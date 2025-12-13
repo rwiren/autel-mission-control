@@ -1,5 +1,4 @@
-cat > README.md <<'EOF'
-# 🚁 Autel Mission Control
+# Autel Mission Control
 
 > **A telemetry interception, storage, and visualization pipeline for Autel Enterprise Drones.**
 
@@ -119,4 +118,3 @@ This software is for **educational and research purposes only**.
 
 ---
 *Maintained by [rwiren](https://github.com/rwiren)*
-EOF
