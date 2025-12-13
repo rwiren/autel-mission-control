@@ -1,0 +1,40 @@
+# ==============================================================================
+# IMAGE: autel-ingestor
+# VERSION: 1.0.0
+# DESCRIPTION: Lightweight Python container for MQTT -> InfluxDB ingestion
+# ==============================================================================
+
+# Use official lightweight Python image
+FROM python:3.12-slim
+
+# Set metadata
+LABEL maintainer="Autel Mission Control Team"
+LABEL version="3.1.0"
+LABEL description="Telemetry Ingestion Service"
+
+# Set working directory inside container
+WORKDIR /app
+
+# Install system dependencies (none currently needed for slim, but good practice)
+# RUN apt-get update && apt-get install -y --no-install-recommends ...
+
+# Install Python libraries
+# We run pip directly as we don't need a venv inside a container
+RUN pip install --no-cache-dir \
+    paho-mqtt==1.6.1 \
+    influxdb-client==1.41.0 \
+    python-dotenv==1.0.0
+
+# Copy application source code
+# We copy specifically what we need to keep the layer small
+COPY src/mqtt_ingest.py .
+
+# Create a non-root user for security
+RUN useradd -m appuser
+USER appuser
+
+# Environment variables (Can be overridden by docker-compose)
+ENV PYTHONUNBUFFERED=1
+
+# Startup Command
+CMD ["python", "mqtt_ingest.py"]

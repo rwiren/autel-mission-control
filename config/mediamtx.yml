@@ -1,0 +1,42 @@
+# ==============================================================================
+# CONFIG: config/mediamtx.yml
+# VERSION: 1.2.0 (RTSP Optimized)
+# AUTHOR: Autel Mission Control Team
+# DESCRIPTION: 
+#   MediaMTX configuration tailored for RTSP workflows.
+#   - Input: RTSP Push (from Drone)
+#   - Output: RTSP (VLC) + HLS (Grafana)
+# ==============================================================================
+
+# Global Server Settings
+api: yes
+apiAddress: :9997
+
+paths:
+  # ----------------------------------------------------------------------------
+  # PATH: /drone
+  # DESCRIPTION: The single pipeline for flight video.
+  # INPUT (Drone):  rtsp://<YOUR_MAC_IP>:8554/drone
+  # OUTPUT (VLC):   rtsp://localhost:8554/drone
+  # OUTPUT (Web):   http://localhost:8888/drone/index.m3u8
+  # ----------------------------------------------------------------------------
+  drone:
+    # Ensure path is always open for the drone to connect
+    runOnDemand: "no"
+    
+    # RTSP specific settings
+    # We accept input from the 'publisher' (the drone)
+    source: publisher
+    
+    # HLS settings (Required for Grafana visualization)
+    hlsVariant: lowLatency
+    hlsSegmentCount: 3
+    hlsSegmentDuration: 1s
+
+# ------------------------------------------------------------------------------
+# LISTENER PORTS
+# ------------------------------------------------------------------------------
+rtspAddress: :8554    # PRIMARY: Input from Drone / Output to VLC
+hlsAddress: :8888     # SECONDARY: Output to Grafana
+rtmpAddress: :1935    # Legacy support (Optional)
+webrtcAddress: :8889  # Ultra-low latency web
