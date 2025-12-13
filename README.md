@@ -12,10 +12,9 @@
 
 **Key Capabilities:**
 * 📡 **Telemetry Interception:** Decodes binary packets for Battery, GPS, Speed, Altitude, and RTK Status.
-* 📊 **Dual-Device Tracking:** Distinguishes between Drone and Controller battery telemetry.
+* 📊 **Dual-Device Tracking:** Distinguishes between Drone and Controller battery and other telemetry.
 * 🗺️ **Live Operations Map:** Real-time visualization of the drone's location using Grafana Geomap.
 * 🗄️ **Black Box Recording:** Stores all flight data in InfluxDB for post-flight forensics.
-* 🛡️ **Spoofing Detection (Planned):** Future integration with OpenSky Network to cross-reference ADS-B data.
 
 ---
 
