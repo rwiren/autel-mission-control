@@ -102,7 +102,6 @@ The project includes pre-configured Grafana dashboards located in `src/dashboard
 ├── src/
 │   ├── bridge.py     # CORE: UDP to MQTT translator script
 │   ├── dashboards/   # JSON exports of Grafana dashboards
-│   └── bridge_opensky.py # (Beta) ADS-B data fetcher
 ├── archive/          # Deprecated scripts and older dashboard versions
 └── README.md         # Documentation
 ```
