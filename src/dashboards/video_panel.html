@@ -8,26 +8,53 @@
     display: flex; 
     justify-content: center; 
     align-items: center; 
-    position: relative;">
+    position: relative;
+    overflow: hidden;">
     
-    <div style="position: absolute; top: 10px; left: 10px; background: red; color: white; font-weight: bold; padding: 2px 5px; font-size: 10px; z-index: 10;">
-        LIVE FEED
+    <div style="position: absolute; top: 10px; left: 10px; background: rgba(220, 20, 60, 0.9); color: white; font-weight: bold; padding: 4px 8px; font-size: 11px; border-radius: 4px; z-index: 10; font-family: sans-serif; box-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+        ● LIVE FEED (HLS)
     </div>
 
-    <video id="autelCam" controls autoplay muted style="width: 100%; height: 100%; object-fit: contain;"></video>
+    <video id="autelCam" controls autoplay muted playsinline style="width: 100%; height: 100%; object-fit: contain;"></video>
 </div>
 
 <script>
+  // CONFIGURATION (Hardcoded for Stability)
+  // -------------------------------------------------------
+  var HOST_IP = '192.168.1.201'; // Your Mac's Static IP
+  var PORT = '8888';             // MediaMTX HLS Port
+  
+  // Use 'live/rtsp-drone1' (Fast Lane) or 'live/rtmp-drone1' (Stable Lane)
+  var STREAM_PATH = 'live/rtsp-drone1';   
+  // -------------------------------------------------------
+
   var video = document.getElementById('autelCam');
-  // Connects to MediaMTX HLS output
-  var videoSrc = 'http://localhost:8888/live/drone1/index.m3u8';
+  var videoSrc = `http://${HOST_IP}:${PORT}/${STREAM_PATH}/index.m3u8`;
+
+  console.log("Autel Player attempting to load:", videoSrc);
 
   if (Hls.isSupported()) {
-    var hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+    var hls = new Hls({ 
+        enableWorker: true, 
+        lowLatencyMode: true,
+        backBufferLength: 90 
+    });
     hls.loadSource(videoSrc);
     hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+      var playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.log("Autoplay prevented by browser policy (mute required): " + error);
+        });
+      }
+    });
   }
   else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    // Native HLS support (Safari)
     video.src = videoSrc;
+    video.addEventListener('loadedmetadata', function() {
+      video.play();
+    });
   }
 </script>

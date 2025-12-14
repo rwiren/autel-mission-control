@@ -1,0 +1,23 @@
+apiVersion: 1
+
+# ---------------------------------------------------------------------------
+# File: config/datasources.yml
+# Version: v0.9.3
+# Description: 
+#   Auto-provisions the connection to InfluxDB container 'autel_influx'.
+# ---------------------------------------------------------------------------
+
+datasources:
+  - name: InfluxDB_Telemetry
+    type: influxdb
+    access: proxy
+    url: http://autel_influx:8086
+    jsonData:
+      version: Flux
+      organization: autel_ops
+      defaultBucket: telemetry
+      tlsSkipVerify: true
+    secureJsonData:
+      token: "my-super-secret-token-change-me"
+    isDefault: true
+    editable: true

@@ -2,25 +2,17 @@ version: '3.8'
 # ---------------------------------------------------------------------------
 # Project: Autel Mission Control
 # File: docker/docker-compose.yml
-# Version: v0.9.1 (Dual-Lane Production)
+# Version: v0.9.3 (Video Unlock & Auto-Provisioning)
 # Date: 2025-12-14
 # Description: 
-#   Production architecture enabling simultaneous RTSP and RTMP support on 
-#   Apple Silicon / Docker environments.
-# 
-#   Services:
-#   1. autel_rtsp: The main Distributor. Serves Dashboard & Direct RTSP.
-#   2. autel_rtmp: The Sanitizer (NGINX). Strips invalid metadata from Drone.
-#   3. autel_bridge: The Worker (FFmpeg). Copies clean video from 2 -> 1.
+#   - Added 'GF_PANELS_DISABLE_SANITIZE_HTML' to allow iframe/video tags.
+#   - Added 'datasources.yml' mount for persistent InfluxDB connection.
+#   - Preserved Dual-Lane Video Architecture (RTSP/RTMP).
 # ---------------------------------------------------------------------------
 
 services:
   # -------------------------------------------------------
   # SERVICE 1: RTSP SERVER (The Distributor)
-  # Role: 
-  #   - Accepts Direct RTSP (Lane 1 - Low Latency)
-  #   - Accepts Bridged RTMP (Lane 2 - High Reliability)
-  #   - Serves WebRTC/HLS to Dashboard
   # -------------------------------------------------------
   rtsp_server:
     image: bluenviron/mediamtx:latest
@@ -28,36 +20,27 @@ services:
     restart: always
     ports:
       - "8554:8554"      # RTSP Ingest (Direct) & Playback
-      - "1936:1935"      # RTMP Internal Ingest (Mapped to 1936 to avoid conflict)
+      - "1936:1935"      # RTMP Internal Ingest (Mapped to 1936)
       - "8888:8888"      # HLS Output
       - "8889:8889"      # WebRTC Output
       - "8189:8189/udp"  # WebRTC ICE
     volumes:
       - ../config/mediamtx.yml:/mediamtx.yml
     environment:
-      # MANDATORY: Replaces 'localhost' with LAN IP for browser connectivity
       - MTX_WEBRTCADDITIONALHOSTS=192.168.1.201
 
   # -------------------------------------------------------
   # SERVICE 2: RTMP INGEST (The Sanitizer)
-  # Role: 
-  #   - Accepts "Dirty" RTMP streams from Autel Drones (Object Type 4 error)
-  #   - Buffers the stream for the Bridge
   # -------------------------------------------------------
   rtmp_server:
     image: tiangolo/nginx-rtmp
     container_name: autel_rtmp
     restart: always
     ports:
-      - "1935:1935" # Public RTMP Port (Drone connects here)
+      - "1935:1935" # Public RTMP Port (Drone Input)
 
   # -------------------------------------------------------
   # SERVICE 3: STREAM BRIDGE (The Worker)
-  # Role: 
-  #   - Pulls from NGINX
-  #   - Copies Video/Audio (Zero Transcode = Low CPU)
-  #   - Pushes Clean RTMP to MediaMTX
-  # Note: Uses native Apple Silicon image to prevent emulation crashes.
   # -------------------------------------------------------
   rtmp_bridge:
     image: mwader/static-ffmpeg:latest
@@ -66,10 +49,6 @@ services:
     depends_on:
       - rtsp_server
       - rtmp_server
-    # COMMAND LOGIC:
-    # 1. Read from NGINX container (autel_rtmp)
-    # 2. Copy stream (no encoding)
-    # 3. Output as FLV/RTMP to MediaMTX container (autel_rtsp)
     command: >
       -re -i rtmp://autel_rtmp:1935/live/rtmp-drone1
       -c copy 
@@ -77,7 +56,7 @@ services:
       rtmp://autel_rtsp:1935/live/rtmp-drone1
 
   # -------------------------------------------------------
-  # METRICS & LOGGING STACK
+  # METRICS STACK
   # -------------------------------------------------------
   mosquitto:
     image: eclipse-mosquitto:2
@@ -125,8 +104,13 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASS}
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      # CRITICAL FOR VIDEO: Allows iframes and scripts in Text Panels
+      - GF_PANELS_DISABLE_SANITIZE_HTML=true
     volumes:
       - grafana_data:/var/lib/grafana
+      # CRITICAL FOR PERSISTENCE: Auto-configures InfluxDB connection
+      - ../config/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
 
 volumes:
   mosquitto_data:
