@@ -113,7 +113,7 @@ This project includes a specialized **"Hardware Health" dashboard** (`src/dashbo
     * Discrete step-graph of the SDR (Software Defined Radio) link quality (0-5 scale).
     * **Goal:** Visualize digital packet loss and signal degradation steps rather than a smoothed average, providing an instant "Go/No-Go" link status.
 
-
+---  
 
 ### 📂 Repository Structure
 
