@@ -1,118 +1,51 @@
-# Autel Mission Control
+# Autel Mission Control - Video & Telemetry Hub
 
-> **A telemetry interception, storage, and visualization pipeline for Autel Enterprise Drones.**
+**Version:** v0.9.1
+**Architecture:** Microservices (Dual-Lane)
 
-![Status](https://img.shields.io/badge/Status-Active_Development-green)
-![Python](https://img.shields.io/badge/Python-3.12-blue)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED)
+A centralized mission control server for Autel drones, running on Docker. It provides real-time video streaming (RTSP/RTMP) and telemetry logging (InfluxDB/Grafana).
 
-## 📖 Overview
+## 🚀 Key Features
+* **Dual-Lane Video:** Supports both **RTSP** (Low Latency) and **RTMP** (High Reliability) simultaneously.
+* **Mac/Docker Optimized:** Fixes UDP packet loss issues on Apple Silicon using a TCP-locked architecture.
+* **Auto-Sanitization:** Automatically cleans "garbage" metadata from Autel RTMP streams using a dedicated bridge.
+* **Dashboard Ready:** Outputs WebRTC and HLS for browser-based ground stations.
 
-**Autel Mission Control** is a localized Ground Control Station (GCS) backend designed for the **Autel Max 4T**. It bypasses the need for proprietary cloud services by capturing raw UDP broadcast packets directly from the drone controller, decoding them, and persisting them for real-time analysis.
+## 📡 Connection Lanes
 
-**Key Capabilities:**
-* 📡 **Telemetry Interception:** Decodes binary packets for Battery, GPS, Speed, Altitude, and RTK Status.
-* 📊 **Dual-Device Tracking:** Distinguishes between Drone and Controller battery and other telemetry.
-* 🗺️ **Live Operations Map:** Real-time visualization of the drone's location using Grafana Geomap.
-* 🗄️ **Black Box Recording:** Stores all flight data in InfluxDB for post-flight forensics.
+### Lane 1: RTSP (Fast Lane)
+Use this for the lowest latency. Connects directly to the main server.
+* **Controller URL:** `rtsp://<YOUR_IP>:8554/live/rtsp-drone1`
+* **VLC Playback:** `rtsp://<YOUR_IP>:8554/live/rtsp-drone1`
 
----
+### Lane 2: RTMP (Stable Lane)
+Use this if RTSP is unstable. Goes through a cleaning layer (NGINX -> FFmpeg).
+* **Controller URL:** `rtmp://<YOUR_IP>:1935/live/rtmp-drone1`
+* **VLC Playback:** `rtmp://<YOUR_IP>:1936/live/rtmp-drone1` *(Note port 1936)*
 
-## 🏗️ System Architecture
+### Dashboard (Browser)
+* **RTSP Feed:** `http://<YOUR_IP>:8889/live/rtsp-drone1`
+* **RTMP Feed:** `http://<YOUR_IP>:8889/live/rtmp-drone1`
 
-The system runs as a hybrid pipeline using **Docker** for infrastructure and **Python** for the translation layer.
+## 🛠️ Quick Start
 
-```mermaid
-graph LR
-    A[Autel Drone] -- UDP Broadcast --> B(Python Bridge)
-    B -- JSON / MQTT --> C[Mosquitto Broker]
-    C --> D[Telegraf / InfluxDB]
-    D --> E[Grafana Dashboard]
-```
+1.  **Configure Environment:**
+    Ensure `.env` contains your IP and credentials.
+    ```bash
+    MQTT_PORT=1883
+    GRAFANA_USER=admin
+    GRAFANA_PASS=admin
+    INFLUX_USER=admin
+    INFLUX_PASS=adminpassword
+    INFLUX_ORG=autel
+    INFLUX_BUCKET=telemetry
+    INFLUX_TOKEN=my-super-secret-token
+    ```
 
-| Component | Technology | Role |
-|-----------|------------|------|
-| **Bridge** | Python 3.12 | Listens on UDP port, parses binary structs, publishes to MQTT. |
-| **Broker** | Eclipse Mosquitto | Lightweight message transport. |
-| **Database** | InfluxDB v2 | Time-series storage for high-frequency telemetry. |
-| **Visualization** | Grafana | Operational dashboard (Map, Battery, Signal Health). |
-| **Video** | MediaMTX | (Experimental) Low-latency RTMP/HLS streaming server. |
+2.  **Launch Stack:**
+    ```bash
+    docker compose --env-file .env -f docker/docker-compose.yml up -d
+    ```
 
----
-
-## 🚀 Quick Start
-
-### 1. Prerequisites
-* **Hardware:** MacBook Pro (M-Series) or Linux Server connected to the same Wi-Fi as the Autel Smart Controller.
-* **Software:** Docker Desktop, Python 3.12+.
-
-### 2. Installation
-Clone the repository:
-```bash
-git clone [https://github.com/rwiren/autel-mission-control.git](https://github.com/rwiren/autel-mission-control.git)
-cd autel-mission-control
-```
-
-Initialize the Python environment:
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r src/requirements.txt
-```
-
-### 3. Launch Infrastructure
-Start the database and dashboard containers:
-```bash
-docker compose --env-file .env -f docker/docker-compose.yml up -d
-```
-
-### 4. Start Telemetry Bridge
-Run the translator to begin capturing data:
-```bash
-source venv/bin/activate
-python src/bridge.py
-```
-> *You should see logs indicating "Connected to MQTT" and "Telemetry Received".*
-
----
-
-## 📊 Dashboards
-
-The project includes pre-configured Grafana dashboards located in `src/dashboards/`:
-
-* **Autel Telemetry Master (v4):** The production-grade dashboard featuring:
-    * **Live Map:** With "Null Island" filtering.
-    * **Battery Monitors:** Separated logic for Drone vs. Controller.
-    * **RTK Status:** Real-time GPS accuracy monitoring.
-
-**To Import:**
-1.  Go to Grafana (`http://localhost:3000`).
-2.  **Dashboards** -> **New** -> **Import**.
-3.  Upload `src/dashboards/autel_telemetry_master.json`.
-
----
-
-## 📂 Project Structure
-
-```text
-├── config/           # Configuration files for Mosquitto/InfluxDB
-├── docker/           # Docker Compose infrastructure
-├── logs/             # Local runtime logs (ignored by Git)
-├── src/
-│   ├── bridge.py     # CORE: UDP to MQTT translator script
-│   ├── dashboards/   # JSON exports of Grafana dashboards
-├── archive/          # Deprecated scripts and older dashboard versions
-└── README.md         # Documentation
-```
-
----
-
-## ⚠️ Disclaimer
-
-This software is for **educational and research purposes only**.
-* This project is **not affiliated with Autel Robotics**.
-* Users are responsible for complying with local aviation regulations (EASA/FAA) regarding telemetry monitoring and radio frequency usage.
-* No warranty is provided for the accuracy of the data. Do not use this as the primary navigation tool for flight safety.
-
----
-*Maintained by [rwiren](https://github.com/rwiren)*
+3.  **Verify Status:**
+    Run `docker ps`. You should see `autel_rtsp`, `autel_rtmp`, and `autel_bridge` running.

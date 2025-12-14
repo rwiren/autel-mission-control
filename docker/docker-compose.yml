@@ -1,37 +1,99 @@
+version: '3.8'
+# ---------------------------------------------------------------------------
+# Project: Autel Mission Control
+# File: docker/docker-compose.yml
+# Version: v0.9.1 (Dual-Lane Production)
+# Date: 2025-12-14
+# Description: 
+#   Production architecture enabling simultaneous RTSP and RTMP support on 
+#   Apple Silicon / Docker environments.
+# 
+#   Services:
+#   1. autel_rtsp: The main Distributor. Serves Dashboard & Direct RTSP.
+#   2. autel_rtmp: The Sanitizer (NGINX). Strips invalid metadata from Drone.
+#   3. autel_bridge: The Worker (FFmpeg). Copies clean video from 2 -> 1.
+# ---------------------------------------------------------------------------
+
 services:
-  mosquitto:
-    image: eclipse-mosquitto:2.0
-    container_name: autel_broker
-    restart: unless-stopped
+  # -------------------------------------------------------
+  # SERVICE 1: RTSP SERVER (The Distributor)
+  # Role: 
+  #   - Accepts Direct RTSP (Lane 1 - Low Latency)
+  #   - Accepts Bridged RTMP (Lane 2 - High Reliability)
+  #   - Serves WebRTC/HLS to Dashboard
+  # -------------------------------------------------------
+  rtsp_server:
+    image: bluenviron/mediamtx:latest
+    container_name: autel_rtsp
+    restart: always
     ports:
-      - "1883:1883"
-      - "9001:9001"
+      - "8554:8554"      # RTSP Ingest (Direct) & Playback
+      - "1936:1935"      # RTMP Internal Ingest (Mapped to 1936 to avoid conflict)
+      - "8888:8888"      # HLS Output
+      - "8889:8889"      # WebRTC Output
+      - "8189:8189/udp"  # WebRTC ICE
     volumes:
-      - ../config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ../config/mediamtx.yml:/mediamtx.yml
+    environment:
+      # MANDATORY: Replaces 'localhost' with LAN IP for browser connectivity
+      - MTX_WEBRTCADDITIONALHOSTS=192.168.1.201
+
+  # -------------------------------------------------------
+  # SERVICE 2: RTMP INGEST (The Sanitizer)
+  # Role: 
+  #   - Accepts "Dirty" RTMP streams from Autel Drones (Object Type 4 error)
+  #   - Buffers the stream for the Bridge
+  # -------------------------------------------------------
+  rtmp_server:
+    image: tiangolo/nginx-rtmp
+    container_name: autel_rtmp
+    restart: always
+    ports:
+      - "1935:1935" # Public RTMP Port (Drone connects here)
+
+  # -------------------------------------------------------
+  # SERVICE 3: STREAM BRIDGE (The Worker)
+  # Role: 
+  #   - Pulls from NGINX
+  #   - Copies Video/Audio (Zero Transcode = Low CPU)
+  #   - Pushes Clean RTMP to MediaMTX
+  # Note: Uses native Apple Silicon image to prevent emulation crashes.
+  # -------------------------------------------------------
+  rtmp_bridge:
+    image: mwader/static-ffmpeg:latest
+    container_name: autel_bridge
+    restart: on-failure
+    depends_on:
+      - rtsp_server
+      - rtmp_server
+    # COMMAND LOGIC:
+    # 1. Read from NGINX container (autel_rtmp)
+    # 2. Copy stream (no encoding)
+    # 3. Output as FLV/RTMP to MediaMTX container (autel_rtsp)
+    command: >
+      -re -i rtmp://autel_rtmp:1935/live/rtmp-drone1
+      -c copy 
+      -f flv 
+      rtmp://autel_rtsp:1935/live/rtmp-drone1
+
+  # -------------------------------------------------------
+  # METRICS & LOGGING STACK
+  # -------------------------------------------------------
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: autel_broker
+    restart: always
+    ports: ["${MQTT_PORT}:1883", "9001:9001"]
+    volumes:
+      - ../config:/mosquitto/config
       - mosquitto_data:/mosquitto/data
       - mosquitto_log:/mosquitto/log
 
-  mediamtx:
-    image: bluenviron/mediamtx:latest
-    container_name: autel_video
-    restart: unless-stopped
-    ports:
-      - "1935:1935"
-      - "8554:8554"
-      - "8888:8888"
-      - "8889:8889"
-    environment:
-      - MTX_PROTOCOLS=tcp
-      # THIS LINE FIXES THE VIDEO LOADING:
-      - MTX_HLSALLOWORIGIN=*
-      - MTX_WEBRTCADDITIONALHOSTS=${MQTT_BROKER_HOST}
-
   influxdb:
-    image: influxdb:2.7
+    image: influxdb:2
     container_name: autel_influx
-    restart: unless-stopped
-    ports:
-      - "8086:8086"
+    restart: always
+    ports: ["8086:8086"]
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUX_USER}
@@ -40,26 +102,34 @@ services:
       - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUX_BUCKET}
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUX_TOKEN}
     volumes:
-      - influxdb_data:/var/lib/influxdb2
+      - influxdb2_data:/var/lib/influxdb2
+
+  telegraf:
+    image: telegraf:1.29
+    container_name: autel_telegraf
+    restart: always
+    depends_on: [influxdb, mosquitto]
+    environment:
+      - INFLUX_TOKEN=${INFLUX_TOKEN}
+      - INFLUX_ORG=${INFLUX_ORG}
+      - INFLUX_BUCKET=${INFLUX_BUCKET}
+    volumes:
+      - ../config/telegraf.conf:/etc/telegraf/telegraf.conf:ro
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana-oss:latest
     container_name: autel_grafana
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    depends_on:
-      - influxdb
-      - mediamtx
+    restart: always
+    ports: ["3000:3000"]
+    depends_on: [influxdb]
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASS}
-      - GF_SECURITY_ALLOW_EMBEDDING=true
     volumes:
       - grafana_data:/var/lib/grafana
 
 volumes:
   mosquitto_data:
   mosquitto_log:
-  influxdb_data:
+  influxdb2_data:
   grafana_data:

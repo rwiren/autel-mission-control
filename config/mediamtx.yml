@@ -1,38 +1,49 @@
-###############################################
-# Autel Mission Control - Video Server Config
-# Powered by MediaMTX
-###############################################
+#############################################################################
+# Project: Autel Mission Control
+# File: config/mediamtx.yml
+# Version: v0.9.1 (Production Config)
+# Description: 
+#   Configuration for the 'autel_rtsp' distributor.
+#   - Locks RTSP to TCP to bypass Mac/Docker firewall issues.
+#   - Enables internal RTMP listening to receive the Bridge stream.
+#############################################################################
 
 paths:
-  # The main telemetry stream
-  # Push URL: rtsp://localhost:8554/autel_stream
-  # Play URL: rtsp://localhost:8554/autel_stream
-  autel_stream:
-    source: publisher
+  # Wildcard accepts:
+  # 1. live/rtsp-drone1 (Direct RTSP connection)
+  # 2. live/rtmp-drone1 (Bridged/Cleaned RTMP connection)
+  all:
 
 # ---------------------------------------------
-# Protocol Settings
+# RTSP SETTINGS (Lane 1)
 # ---------------------------------------------
-
-# RTSP (Low Latency, Primary)
 rtsp: yes
 rtspAddress: :8554
+# CRITICAL: We force TCP transport. 
+# This prevents the "Session Timed Out" (Black Screen) error on Mac Docker.
+protocols: [tcp]
 
-# RTMP (Legacy support for OBS/YouTube)
+# ---------------------------------------------
+# RTMP SETTINGS (Lane 2 Input)
+# ---------------------------------------------
+# Enabled to allow the 'autel_bridge' container to push video here.
 rtmp: yes
 rtmpAddress: :1935
 
-# HLS (For Web Browsers / Grafana)
+# ---------------------------------------------
+# WEB PLAYBACK (Dashboard Output)
+# ---------------------------------------------
 hls: yes
 hlsAddress: :8888
-hlsVariant: lowLatency  # Crucial for live drone ops
+hlsVariant: lowLatency
 
-# WebRTC (Ultra-low latency web playback)
 webrtc: yes
 webrtcAddress: :8889
+# MANDATORY: Tells the browser the physical IP of the Mac.
+webrtcAdditionalHosts: [ "192.168.1.201" ]
 
 # ---------------------------------------------
-# Tuning
+# STABILITY TUNING
 # ---------------------------------------------
-readTimeout: 10s
-writeTimeout: 10s
+readTimeout: 20s
+writeTimeout: 20s
