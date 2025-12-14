@@ -37,6 +37,71 @@
 
 The v0.9.1 architecture utilizes a microservices approach to ensure stability. Video responsibilities are split into three distinct containers to prevent failure in one protocol from affecting the other.
 
+```mermaid
+flowchart TD
+    %% -------------------
+    %% NODES: External Hardware
+    %% -------------------
+    Drone([🚁 Autel Drone])
+    Controller([🎮 Controller])
+    Browser([💻 Dashboard / Browser])
+    VLC([📽️ VLC Player])
+
+    %% -------------------
+    %% SUBGRAPH: Docker Microservices Stack (v0.9.1)
+    %% -------------------
+    subgraph Docker_Host ["🐳 Docker Host (Mac/Linux)"]
+        style Docker_Host fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+        
+        %% Service 1: The Distributor
+        subgraph S_RTSP ["📦 autel_rtsp (MediaMTX)"]
+            style S_RTSP fill:#d1c4e9,stroke:#512da8
+            MTX_Core[Media Server Core]
+        end
+
+        %% Service 2: The Sanitizer
+        subgraph S_RTMP ["🛡️ autel_rtmp (NGINX)"]
+            style S_RTMP fill:#ffccbc,stroke:#bf360c
+            NGINX_Ingest[RTMP Ingest]
+        end
+
+        %% Service 3: The Worker
+        subgraph S_Bridge ["🌉 autel_bridge (FFmpeg)"]
+            style S_Bridge fill:#c8e6c9,stroke:#2e7d32
+            Bridge_Worker[Stream Copier]
+        end
+    end
+
+    %% -------------------
+    %% LAN### Mermaid Diagram Code
+<details>
+  <summaE 1: RTSP (Fast Lane)
+    %% -------------------
+    Drone --"RTSP (TCP) :8554"--> MTX_Core
+    %% Note: Direct connection, low latency
+
+    %% -------------------
+    %% LANE 2: RTMP (Stable Lane)
+    %% -------------------
+    Drone --"RTMP (Dirty) :1935"--> NGINX_Ingest
+    NGINX_Ingest --"Internal Stream"--> Bridge_Worker
+    Bridge_Worker --"RTMP (Cleaned) :1935"--> MTX_Core
+    %% Note: Sanitized via Bridge
+
+    %% -------------------
+    %% CONSUMERS (Outputs)
+    %% -------------------
+    MTX_Core --"WebRTC :8889"--> Browser
+    MTX_Core --"HLS :8888"--> Browser
+    MTX_Core --"RTSP :8554"--> VLC
+    
+    %% -------------------
+    %% CONTROLLER FEEDBACK
+    %% -------------------
+    %% FIXED LINE BELOW: Label is now correctly inside the dotted link
+    Controller -. "Telemetry / Control" .- Drone
+```
+
 ### Visual Overview
 *(Click the diagram below to enlarge)*
 
