@@ -1,5 +1,24 @@
 # Release Notes
 
+## [v0.9.5] - 2025-12-15 "The Infinity Link"
+### 🚀 Major Connectivity Upgrade: ZeroTier SD-WAN
+* **Architecture Shift:** Replaced fragile local IP addressing with a **Global Virtual LAN (SD-WAN)**.
+* **The "Virtual Cable":** Established a permanent, encrypted tunnel between the Autel Smart Controller V3 and the Mission Control Server (MacBook Pro M4 Max).
+* **Key Benefits:**
+    * **Static IPs Everywhere:** The Controller is always `...113` and the Server is always `...61`, regardless of 4G/5G/Wi-Fi changes.
+    * **NAT Traversal:** ZeroTier punches through mobile carrier NATs automatically—no port forwarding or public IPs required.
+    * **Security:** All video and telemetry traffic is end-to-end encrypted.
+    * **Ease of Install:** Verified simple APK sideloading on the Controller without rooting.
+
+### 🛠️ Improvements
+* **Engineering Dashboard (v2):** Added "Altitude Truth" (Baro vs. RTK) and "Signal Strength" (SDR) gauges.
+* **DevOps:** Added `scripts/monitor_video_handshake.sh` for instant connection verification.
+* **Docs:** Added `docs/zerotier_path_flow.png` to visualize the new topology.
+
+### 📦 New Artifacts
+* `src/dashboards/autel_engineering_v2.json`
+* `docs/zerotier_path_flow.png`
+
 ## v0.9.1 (2025-12-14) - The Dual-Lane Update
 
 ### 🌟 Major Features
