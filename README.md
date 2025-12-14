@@ -68,7 +68,8 @@ Both lanes are instantly available for browser playback.
 ### 💻 Mission Control Dashboard
 The system outputs a unified "Glass Cockpit" interface, combining low-latency video with real-time tactical mapping.
 
-![Mission Control Dashboard](docs/mission_control_dashboard.png)
+![Mission Control Dashboard]([(https://github.com/rwiren/autel-mission-control/blob/main/docs/mission-control-dashboard.png])
+
 
 * **Left Panel (Visual):**
     * **Source:** `autel_rtsp` container.
