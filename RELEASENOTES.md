@@ -4,7 +4,7 @@
 
 ### 🌟 Major Features
 * **Microservices Video Architecture:** Split video handling into three dedicated containers (`rtsp_server`, `rtmp_server`, `rtmp_bridge`) to ensure isolation and stability.
-* **Apple Silicon Native:** Migrated FFmpeg bridge to `mwader/static-ffmpeg` to fix emulation crashes on M1/M2/M3 chips.
+* **Apple Silicon Native:** Migrated FFmpeg bridge to `mwader/static-ffmpeg` to fix emulation crashes on M1/M2/M3/M4/M5 chips.
 * **RTSP TCP Lock:** Enforced `protocols: [tcp]` in MediaMTX to bypass Mac Docker's inability to route UDP video packets.
 * **RTMP Sanitizer:** Introduced NGINX ingestion layer to strip "Unsupported Object Type 4" errors from Autel drone streams before they reach the main server.
 
