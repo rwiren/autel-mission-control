@@ -47,7 +47,7 @@ The v0.9.1 architecture utilizes a microservices approach to ensure stability. V
 
 > **Important:** Replace `<YOUR_IP>` with the actual LAN IP address of your host machine (e.g., `192.168.1.50`). Do **not** use `localhost` on the drone controller.
 
-**Technical Deep Dive:** Read **[docs/VIDEO_PROTOCOLS.md](docs/VIDEO_PROTOCOLS.md)** to understand the specific handshake mechanics and why this dual-lane setup is required.
+**Technical Deep Dive:** Read **[docs/VIDEO_PROTOCOLS.md](docs/VIDEO_PROTOCOLS.md)** to understand the differencies between the different video procols that Autel supports.
 
 ### Lane 1: RTSP (Fast Lane - Low Latency)
 Connects directly to the main media server via TCP. Best for real-time piloting cues.
