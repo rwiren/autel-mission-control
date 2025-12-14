@@ -91,6 +91,30 @@ The system outputs a unified "Glass Cockpit" interface, combining low-latency vi
 
 ---   
 
+## 📊 Engineering & Telemetry Dashboard
+This project includes a specialized **"Hardware Health" dashboard** (`src/dashboards/autel_engineering_v2.json`) designed for pre-flight checks and post-flight data forensics. Unlike standard flight apps, this view exposes raw sensor comparisons to detect hardware drift or failure.
+
+![Engineering Dashboard](docs/dashboard_engineering_v2.png)
+
+### Key Instruments:
+* **🛰️ Precision Lock (GNSS vs. RTK):**
+    * Visualizes the satellite count delta between the standard consumer GPS module and the RTK (Real-Time Kinematic) module.
+    * **Goal:** Verify RTK "Fixed" status (typically 20+ sats) versus standard GPS float (10-12 sats) before takeoff.
+
+* **⛰️ Altitude Truth (Barometer vs. Geometry):**
+    * Plots **Barometric Altitude** (pressure-based, susceptible to drift) against **RTK Ellipsoidal Height** (geometric truth).
+    * **Goal:** Detect pressure sensor drift or calibration errors in real-time by observing divergence between the solid (RTK) and dashed (Baro) lines.
+
+* **🔋 Battery Load Profiling:**
+    * High-resolution voltage monitoring (mV precision) converted to Volts.
+    * **Goal:** Identify "Voltage Sag" under load. A steep dip during throttle punches indicates rising internal resistance (aging battery) even if the reported percentage remains high.
+
+* **📡 Digital Signal Analyzer:**
+    * Discrete step-graph of the SDR (Software Defined Radio) link quality (0-5 scale).
+    * **Goal:** Visualize digital packet loss and signal degradation steps rather than a smoothed average, providing an instant "Go/No-Go" link status.
+
+
+
 ### 📂 Repository Structure
 
 ```text

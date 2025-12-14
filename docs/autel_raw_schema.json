@@ -1,0 +1,228 @@
+{
+    "bid": "5a53cc4e-8de4-4e6a-a5c9-baed26f2f57b",
+    "data": {
+        "10052-0-0": {
+            "gimbal_pitch": 0.0,
+            "gimbal_roll": 0.0,
+            "gimbal_yaw": -168.69,
+            "measure_target_error_state": 0,
+            "payload_index": "10052-0-0",
+            "zoom_factor": 1.0
+        },
+        "activation_time": 1765373641,
+        "ai_enable_func": 0,
+        "alarm_status": 0,
+        "attitude_head": -168.8963,
+        "attitude_pitch": 6.859368324279785,
+        "attitude_roll": -1.6991442441940308,
+        "battery": {
+            "batteries": [],
+            "capacity_percent": 70,
+            "landing_power": 6590,
+            "remain_flight_time": 1862,
+            "return_home_power": 6590
+        },
+        "cameras": [
+            {
+                "camera_mode": 0,
+                "ir_focal_length": 9.1,
+                "ir_fov_h": 48.1,
+                "ir_fov_v": 38.4,
+                "ir_metering_mode": 0,
+                "ir_zoom_factor": 1.0,
+                "payload_index": "10052-0-0",
+                "photo_state": 0,
+                "photo_storage_settings": [
+                    "zoom",
+                    "ir"
+                ],
+                "record_time": 0,
+                "recording_state": 0,
+                "remain_photo_num": 29515,
+                "remain_record_duration": 161192,
+                "screen_split_enable": 0,
+                "video_storage_settings": [
+                    "zoom",
+                    "ir"
+                ],
+                "zoom_factor": 1.0,
+                "zoom_focal_length": 4.49,
+                "zoom_fov_h": 58.59527,
+                "zoom_fov_v": 45.456676
+            }
+        ],
+        "capacity_percent": 75,
+        "compatible_status": 0,
+        "country": "FI",
+        "device_list": [
+            {
+                "available_video_number": 2,
+                "camera_list": [
+                    {
+                        "available_video_number": 1,
+                        "camera_index": "10052-0-0",
+                        "coexist_video_number_max": 1,
+                        "video_list": [
+                            {
+                                "video_index": "zoom-0",
+                                "video_type": "zoom"
+                            },
+                            {
+                                "video_index": "ir-0",
+                                "video_type": "ir"
+                            }
+                        ]
+                    }
+                ],
+                "coexist_video_number_max": 1,
+                "sn": "1748FEV3HMM825451479"
+            }
+        ],
+        "distance_limit_status": {
+            "distance_limit": 1500,
+            "is_near_distance_limit": 0,
+            "state": 1
+        },
+        "drone_list": [
+            {
+                "attitude_head": -168.8963,
+                "attitude_pitch": 6.859368324279785,
+                "attitude_roll": -1.6991442441940308,
+                "battery": {
+                    "batteries": [],
+                    "capacity_percent": 70,
+                    "remain_flight_time": 1862,
+                    "voltage": 15636
+                },
+                "drone_id": "-1753358408",
+                "drone_name": "Air_977DDFB8",
+                "dsp_quality": 100,
+                "elevation": -0.001,
+                "gps_time": 156646,
+                "height": 56.541,
+                "home_distance": 0.0,
+                "horizontal_speed": 0.0,
+                "latitude": 60.3195365,
+                "longitude": 24.8307789,
+                "mode_code": 0,
+                "node_id": 1,
+                "position_state": {
+                    "calibration": 0,
+                    "coordinate_sys": 0,
+                    "fix_sta": 0,
+                    "gps_number": 17,
+                    "quality": 0,
+                    "rtk_hgt": 0.0,
+                    "rtk_inpos": 0,
+                    "rtk_lat": 0.0,
+                    "rtk_lon": 0.0,
+                    "rtk_number": 0,
+                    "rtk_used": 0
+                },
+                "sn": "1748FEV3HMM825451479",
+                "storage": {
+                    "storage_type": 1,
+                    "total": 66395,
+                    "used": 1810
+                },
+                "vertical_speed": 0.0
+            }
+        ],
+        "elevation": -0.001,
+        "firmware_version": "1.9.1.173",
+        "gear_level": 0,
+        "gimbal_angle_follow_toggle": 0,
+        "height": 56.541,
+        "height_limit": 120,
+        "home_distance": 0.0,
+        "horizontal_speed": 0.0,
+        "infrared_palette_mode": 0,
+        "is_near_area_limit": 0,
+        "is_near_height_limit": 0,
+        "latitude": 60.31954,
+        "list": [
+            {
+                "args": {
+                    "alarm_id": 0,
+                    "component_index": 1150,
+                    "sensor_index": 1013
+                },
+                "code": "0x0307",
+                "device_type": "0-11000-0",
+                "imminent": 0,
+                "in_the_sky": 0,
+                "level": 1,
+                "module": 3
+            }
+        ],
+        "live_status": [
+            {
+                "error_status": 0,
+                "status": 1,
+                "video_id": "1748FEV3HMM825451479/10052-0-0/normal-0",
+                "video_quality": 0,
+                "video_type": "zoom"
+            },
+            {
+                "error_status": 0,
+                "status": 0,
+                "video_id": "1748FEV3HMM825451479/10052-0-0/normal-0",
+                "video_quality": 0,
+                "video_type": "ir"
+            }
+        ],
+        "longitude": 24.830778,
+        "mode_code": 0,
+        "ned_altitude": 0.001,
+        "ned_latitude": 0.0,
+        "ned_longitude": 0.0,
+        "night_lights_state": 0,
+        "ntrip_status": "error",
+        "obstacle_avoidance": {
+            "downside": 1,
+            "horizon": 1,
+            "upside": 1
+        },
+        "pos_type": "34",
+        "position_state": {
+            "calibration": 0,
+            "coordinate_sys": 0,
+            "fix_sta": 0,
+            "gps_number": 5,
+            "is_fixed": 3,
+            "quality": 0,
+            "rtk_hgt": 56.5455322265625,
+            "rtk_inpos": 1,
+            "rtk_lat": 60.319502449247466,
+            "rtk_lon": 24.83055955161586,
+            "rtk_number": 24,
+            "rtk_used": 1
+        },
+        "rc_lost_action": 2,
+        "remote_id_status": 0,
+        "rid_state": 1,
+        "sn": "1748FEV3HMM825451479",
+        "storage": {
+            "storage_type": 1,
+            "total": 67988480,
+            "used": 1853440
+        },
+        "total_armed_time": 0,
+        "total_flight_time": 435.0,
+        "vel_ned_x": 0.0,
+        "vel_ned_y": 0.0,
+        "vel_ned_z": 0.0,
+        "vertical_speed": 0.0,
+        "wireless_link": {
+            "4g_link_state": 0,
+            "4g_sim_card_detected": 0,
+            "4g_uav_quality": 0,
+            "sdr_link_state": 1,
+            "sdr_quality": 5
+        }
+    },
+    "gateway": "TH7825451059",
+    "method": "hms",
+    "tid": "79f89411-5b13-4a90-a272-27e82762bce0",
+    "timestamp": 1765729922498
+}
