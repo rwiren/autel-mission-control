@@ -1,7 +1,6 @@
 # 🚁 Autel Mission Control
 
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/rwiren/autel-mission-control)](https://github.com/rwiren/autel-mission-control/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Docker%20%7C%20Mac%20Silicon-lightgrey.svg)]()
 
