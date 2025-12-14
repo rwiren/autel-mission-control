@@ -62,6 +62,27 @@ Both lanes are instantly available for browser playback.
 * **WebRTC Feed (Lowest Latency):** `http://<YOUR_IP>:8889/live/rtsp-drone1` (or `rtmp-drone1`)
 * **LL-HLS Feed:** `http://<YOUR_IP>:8888/live/rtsp-drone1`
 
+### 📂 Repository Structure
+
+```text
+.
+├── config/                  # Service configurations
+│   ├── mediamtx.yml         # MediaMTX rules (TCP locking, paths)
+│   ├── mosquitto.conf       # MQTT broker settings
+│   └── telegraf.conf        # Telegraf data collector config
+├── docker/
+│   └── docker-compose.yml   # The V0.9.1 Microservices Stack
+├── docs/                    # Architecture diagrams & protocol notes
+├── scripts/                 # Management utilities (Reset DB, Monitor)
+├── src/
+│   └── dashboards/          # Frontend resources
+│       ├── autel_telemetry_master.json  # Grafana Dashboard (Importable)
+│       └── video_panel.html             # Standalone WebRTC Viewer
+├── LICENSE
+├── README.md                # This file
+└── RELEASENOTES.md          # Version history and changelog
+```
+
 ## 🛠️ Quick Start Deployment
 
 1.  **Prerequisites:** Ensure Docker and Docker Compose are installed.
