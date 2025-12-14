@@ -64,6 +64,27 @@ Both lanes are instantly available for browser playback.
 * **WebRTC Feed (Lowest Latency):** `http://<YOUR_IP>:8889/live/rtsp-drone1` (or `rtmp-drone1`)
 * **LL-HLS Feed:** `http://<YOUR_IP>:8888/live/rtsp-drone1`
 
+
+### 💻 Mission Control Dashboard
+The system outputs a unified "Glass Cockpit" interface, combining low-latency video with real-time tactical mapping.
+
+![Mission Control Dashboard](docs/mission_control_dashboard.png)
+
+* **Left Panel (Visual):**
+    * **Source:** `autel_rtsp` container.
+    * **Tech:** WebRTC (Port 8889) for <500ms latency.
+    * **Config:** `GF_PANELS_DISABLE_SANITIZE_HTML=true` allows direct video embedding.
+
+* **Right Panel (Tactical):**
+    * **Source:** `autel_influx` container (via MQTT/Telegraf).
+    * **Tech:** Grafana Geomap with Dual Layers (Route Line + Drone Icon).
+    * **Data:** Visualizes real-time GPS telemetry (`lat`/`lon`) filtered to remove null island errors.
+
+**Access Feeds Directly:**
+* **WebRTC Feed:** `http://<YOUR_IP>:8889/live/rtsp-drone1`
+* **HLS Feed:** `http://<YOUR_IP>:8888/live/rtsp-drone1`
+   
+
 ### 📂 Repository Structure
 
 ```text
