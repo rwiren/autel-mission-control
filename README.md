@@ -37,11 +37,14 @@
 
 The v0.9.1 architecture utilizes a microservices approach to ensure stability. Video responsibilities are split into three distinct containers to prevent failure in one protocol from affecting the other.
 
+---
 
 ### Visual Overview
 *(Click the diagram below to enlarge)*
 
 [![v0.9.1 Dual-Lane Architecture](docs/Decision%20Path%20Selection%20Flow-2025-12-14-132635.png)](docs/Decision%20Path%20Selection%20Flow-2025-12-14-132635.png)
+
+---
 
 ## 📡 Connection Lanes & Usage
 
@@ -64,6 +67,7 @@ Both lanes are instantly available for browser playback.
 * **WebRTC Feed (Lowest Latency):** `http://<YOUR_IP>:8889/live/rtsp-drone1` (or `rtmp-drone1`)
 * **LL-HLS Feed:** `http://<YOUR_IP>:8888/live/rtsp-drone1`
 
+---
 
 ### 💻 Mission Control Dashboard
 The system outputs a unified "Glass Cockpit" interface, combining low-latency video with real-time tactical mapping.
@@ -84,7 +88,8 @@ The system outputs a unified "Glass Cockpit" interface, combining low-latency vi
 **Access Feeds Directly:**
 * **WebRTC Feed:** `http://<YOUR_IP>:8889/live/rtsp-drone1`
 * **HLS Feed:** `http://<YOUR_IP>:8888/live/rtsp-drone1`
-   
+
+---   
 
 ### 📂 Repository Structure
 
@@ -106,6 +111,8 @@ The system outputs a unified "Glass Cockpit" interface, combining low-latency vi
 ├── README.md                # This file
 └── RELEASENOTES.md          # Version history and changelog
 ```
+
+---
 
 ## 🛠️ Quick Start Deployment
 
