@@ -5,7 +5,7 @@
 * **Architecture Shift:** Replaced fragile local IP addressing with a **Global Virtual LAN (SD-WAN)**.
 * **The "Virtual Cable":** Established a permanent, encrypted tunnel between the Autel Smart Controller V3 and the Mission Control Server (MacBook Pro M4 Max).
 * **Key Benefits:**
-    * **Static IPs Everywhere:** The Controller is always `...113` and the Server is always `...61`, regardless of 4G/5G/Wi-Fi changes.
+    * **Static IPs Everywhere:** The Controller is always `...12` and the Server is always `...34`, regardless of 4G/5G/Wi-Fi changes.
     * **NAT Traversal:** ZeroTier punches through mobile carrier NATs automatically—no port forwarding or public IPs required.
     * **Security:** All video and telemetry traffic is end-to-end encrypted.
     * **Ease of Install:** Verified simple APK sideloading on the Controller without rooting.
