@@ -9,7 +9,7 @@
 
 ---
 
-### 📢 🆕 Latest Updates: v0.9.1 released!
+### 📢 🆕 Latest Updates: v0.9.5 released!
 **[Click here to view the RELEASENOTES.md for detailed changelogs and architecture shifts.](RELEASENOTES.md)**
 
 ---
@@ -135,6 +135,34 @@ This project includes a specialized **"Hardware Health" dashboard** (`src/dashbo
 ├── README.md                # This file
 └── RELEASENOTES.md          # Version history and changelog
 ```
+
+---
+
+## 🌐 Connectivity: The ZeroTier "Virtual Cable"
+
+Unlike standard setups that break when you switch from Home Wi-Fi to a Field Hotspot, this project uses **ZeroTier** to create a permanent, encrypted virtual LAN.
+
+### The Architecture
+![ZeroTier Data Flow](docs/zerotier_path_flow.png)
+
+This topology allows the **Field Unit** (Drone + Controller) and **Mission Control** (Server) to behave as if they are plugged into the same physical switch, even when miles apart on different 4G/5G networks.
+
+### ⚡ Why We Use ZeroTier?
+1.  **Static IPs Forever:**
+    * The Controller is assigned `192.168.x.12`.
+    * The Server is assigned `192.168.x.34`.
+    * *Benefit:* We never have to reconfigure the Drone's RTMP URL when moving locations.
+2.  **NAT Traversal (The "Magic"):**
+    * Standard mobile hotspots (4G/5G) use CGNAT, which blocks incoming connections.
+    * *Benefit:* ZeroTier punches through these barriers automatically. No port forwarding or static public IPs are needed from your ISP.
+3.  **End-to-End Encryption:**
+    * *Benefit:* Your live video feed and telemetry are encrypted inside the tunnel, protecting them from public internet snooping.
+4.  **Simple Installation:**
+    * *Benefit:* The Autel Smart Controller V3 runs Android, allowing us to simply sideload the official [ZeroTier APK](http://download.zerotier.com/dist/ZeroTierOne.apk) via the browser. No rooting or complex hacking required.
+
+### 📡 Data Flow Summary
+* **Video:** Drone -> Controller -> **ZeroTier Tunnel** -> Server (Port 1935 RTMP and 8554 RTSP)
+* **Telemetry:** Drone -> Controller -> **ZeroTier Tunnel** -> Server (Port 1883 MQTT)
 
 ---
 
