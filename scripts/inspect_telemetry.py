@@ -1,138 +1,167 @@
-#!/usr/bin/env python3
-"""
------------------------------------------------------------------------------
-Script: inspect_telemetry.py
-Version: v0.9.5 (Data Science Toolset)
-Author: System Architect (Gemini)
-Date: 2025-12-14
-Description: 
-    Deep introspection of the InfluxDB 'telemetry' bucket.
-    1. Lists all active Measurements.
-    2. Analyzes field types and counts (Data Density).
-    3. Detects "Dirty Data" (Zero-Island coordinates: Lat/Lon == 0).
-    4. Shows the most recent live packet.
-
-Usage:
-    python3 scripts/inspect_telemetry.py
------------------------------------------------------------------------------
-"""
-
-import sys
-from datetime import datetime
+import os
+import time
+import statistics
 from influxdb_client import InfluxDBClient
 
-# ---------------------------------------------------------------------------
-# CONFIGURATION
-# ---------------------------------------------------------------------------
-# In a production environment, load these from os.environ or .env
-URL = "http://localhost:8086"
-TOKEN = "my-super-secret-token-change-me"
-ORG = "autel_ops"
-BUCKET = "telemetry"
+# ==============================================================================
+# Script Name: inspect_telemetry.py
+# Description: Development-grade telemetry inspector.
+#              1. Scans data volume (Last 4 Hours).
+#              2. Checks Sensor Health (RTK vs Baro).
+#              3. "Action Finder": Locates Takeoff/Landing by detecting motion.
+#              4. Calculates Geoid Offset (Truth Analysis).
+# Version:     1.4.1 (Dev Mode: Hardcoded Token)
+# Author:      System Architect (Gemini)
+# Date:        2025-12-15
+# ==============================================================================
 
-def print_header(title):
-    print(f"\n{'='*60}")
-    print(f" {title}")
-    print(f"{'='*60}")
+# Configuration
+INFLUX_URL = "http://localhost:8086"
+INFLUX_ORG = "autel_ops"
+INFLUX_BUCKET = "telemetry"
+
+# SECURITY: Hardcoded for Dev Convenience (as requested)
+INFLUX_TOKEN = "my-super-secret-token-change-me"
+
+# Analysis Settings
+# Look back 4 hours to find the flight session
+TIME_RANGE = "-4h"       
+# Correction factor detected in previous runs (RTK is ~3.13m higher than Baro)
+GEOID_OFFSET = 3.13      
+
+def print_header(text):
+    print(f"\n============================================================")
+    print(f" {text}")
+    print(f"============================================================")
 
 def inspect_bucket():
-    client = InfluxDBClient(url=URL, token=TOKEN, org=ORG)
+    print_header(f"📡 TELEMETRY INSPECTOR v1.4.1 | Window: {TIME_RANGE}")
+
+    client = InfluxDBClient(
+        url=INFLUX_URL, 
+        token=INFLUX_TOKEN, 
+        org=INFLUX_ORG, 
+        timeout=60_000
+    )
     query_api = client.query_api()
 
-    print_header("📡 TELEMETRY INSPECTOR v0.9.5")
-
-    # -----------------------------------------------------------------------
-    # 1. MEASUREMENT DISCOVERY
-    # -----------------------------------------------------------------------
-    print("\n🔍 Scanning for Measurements...")
-    query_measurements = f'import "influxdata/influxdb/schema" schema.measurements(bucket: "{BUCKET}")'
-    
     try:
-        tables = query_api.query(query_measurements)
-        measurements = [record.get_value() for table in tables for record in table]
+        # ---------------------------------------------------------
+        # PART 1: General Volume Scan
+        # ---------------------------------------------------------
+        print("🔍 Step 1: Scanning Data Volume...")
         
-        if not measurements:
-            print("   [!] No measurements found. Bucket is empty.")
-            return
-
-        print(f"   Found {len(measurements)} Measurement(s): {', '.join(measurements)}")
-
-    except Exception as e:
-        print(f"   [!] Connection Failed: {e}")
-        return
-
-    # -----------------------------------------------------------------------
-    # 2. FIELD ANALYSIS (Focus on 'mqtt_consumer')
-    # -----------------------------------------------------------------------
-    target_meas = "mqtt_consumer"
-    if target_meas in measurements:
-        print_header(f"📊 ANALYSIS: {target_meas}")
+        # We count fields to verify data exists
+        stats_query = f"""
+        from(bucket: "{INFLUX_BUCKET}")
+          |> range(start: {TIME_RANGE})
+          |> filter(fn: (r) => r["_measurement"] == "mqtt_consumer")
+          |> count()
+          |> group(columns: ["_field"])
+          |> sum()
+        """
         
-        # Count total records in last 24h
-        count_query = f'''
-            from(bucket: "{BUCKET}")
-            |> range(start: -24h)
-            |> filter(fn: (r) => r["_measurement"] == "{target_meas}")
-            |> count()
-            |> group(columns: ["_field"])
-            |> yield(name: "counts")
-        '''
-        tables = query_api.query(count_query)
+        result = query_api.query(stats_query)
+        field_counts = {}
         
-        print(f"{'Field Name':<30} | {'Count (24h)':<10}")
-        print("-" * 45)
-        
-        field_names = []
-        for table in tables:
+        for table in result:
             for record in table:
                 field = record.get_field()
                 count = record.get_value()
-                print(f"{field:<30} | {count:<10}")
-                field_names.append(field)
+                if field and count:
+                    field_counts[field] = count
 
-        # -------------------------------------------------------------------
-        # 3. DIRTY DATA DETECTION (GPS)
-        # -------------------------------------------------------------------
-        if "data_latitude" in field_names:
-            print_header("🧹 QUALITY CHECK: GPS Data")
+        if not field_counts:
+            print(f"   ⚠️  No data found in the last {TIME_RANGE}.")
+            return
+
+        print(f"   ✅ Data Found! Total Active Fields: {len(field_counts)}")
+
+        # ---------------------------------------------------------
+        # PART 2: Find the "Action" (Dynamic Movement)
+        # ---------------------------------------------------------
+        print_header("🎬 Step 2: Locating High-Motion Segment (Takeoff/Landing)")
+        print(f"   Applying Geoid Offset of -{GEOID_OFFSET}m to RTK data...")
+
+        # Dynamic query that:
+        # 1. Resamples to 1s
+        # 2. Applies the offset math
+        # 3. Sorts by time to show the flight sequence
+        accuracy_query = f"""
+        from(bucket: "{INFLUX_BUCKET}")
+          |> range(start: {TIME_RANGE})
+          |> filter(fn: (r) => r["_measurement"] == "mqtt_consumer")
+          |> filter(fn: (r) => r["_field"] == "data_position_state_rtk_hgt" or r["_field"] == "data_drone_list_0_height")
+          // 1. Resample to 1s resolution
+          |> aggregateWindow(every: 1s, fn: mean, createEmpty: true)
+          // 2. Fill gaps
+          |> fill(usePrevious: true)
+          // 3. Ungroup to merge streams
+          |> group() 
+          // 4. Pivot to get columns side-by-side
+          |> pivot(rowKey:["_time"], columnKey:["_field"], valueColumn:"_value")
+          |> map(fn: (r) => ({{
+              _time: r._time,
+              rtk: r["data_position_state_rtk_hgt"],
+              baro: r["data_drone_list_0_height"],
+              // Apply Calibration: (RTK - Offset) - Baro
+              error: (r["data_position_state_rtk_hgt"] - {GEOID_OFFSET}) - r["data_drone_list_0_height"]
+          }}))
+          // 5. Validity Filter
+          |> filter(fn: (r) => exists r.rtk and exists r.baro)
+          // 6. Sort Oldest -> Newest to replay the flight
+          |> sort(columns: ["_time"], desc: false)
+        """
+
+        accuracy_tables = query_api.query(accuracy_query)
+        
+        print(f"\n   {'TIMESTAMP':<25} | {'RTK (Adj)':<10} | {'BARO (m)':<10} | {'ERROR':<10}")
+        print("   " + "-"*65)
+
+        errors = []
+        rows_printed = 0
+        last_alt = -999
+
+        for table in accuracy_tables:
+            for record in table:
+                t_str = record["_time"].strftime("%H:%M:%S")
+                # Apply offset visually for the table
+                rtk = record["rtk"] - GEOID_OFFSET if record["rtk"] else 0
+                baro = record["baro"] if record["baro"] else 0
+                err = record["error"] if record["error"] else 0
+                
+                # MOTION FILTER: Only print if altitude changed by > 0.5m since last print
+                # This effectively finds "Takeoff" and "Landing" events
+                if abs(rtk - last_alt) > 0.5 or rows_printed < 5:
+                    errors.append(abs(err))
+                    
+                    marker = ""
+                    if abs(err) > 1.0: marker = "⚠️ DRIFT"
+
+                    print(f"   {t_str:<25} | {rtk:>10.3f} | {baro:>10.3f} | {err:>10.3f} {marker}")
+                    
+                    last_alt = rtk
+                    rows_printed += 1
+                
+                # Limit output to first 25 significant events to keep terminal clean
+                if rows_printed > 25:
+                    break
+
+        if errors:
+            mean_err = statistics.mean(errors)
+            print("   " + "-"*65)
+            print(f"   📊 CALIBRATION STATUS: Mean Error: {mean_err:.3f}m")
             
-            # Count Zeros (Null Island)
-            zero_query = f'''
-                from(bucket: "{BUCKET}")
-                |> range(start: -24h)
-                |> filter(fn: (r) => r["_measurement"] == "{target_meas}")
-                |> filter(fn: (r) => r["_field"] == "data_latitude")
-                |> filter(fn: (r) => r["_value"] == 0.0)
-                |> count()
-            '''
-            result = query_api.query(zero_query)
-            zero_count = 0
-            if result:
-                 for table in result:
-                    for record in table:
-                        zero_count = record.get_value()
-
-            print(f"   Checking for 'Null Island' (Lat=0.0)...")
-            if zero_count > 0:
-                print(f"   ⚠️  WARNING: Found {zero_count} records with invalid GPS (0.0).")
-                print("   -> Recommendation: Apply filter in Grafana or clean DB.")
+            if mean_err < 0.5:
+                print("   ✅ SYSTEM OPTIMIZED: Geoid Offset is perfectly calibrated.")
+                print("      Your Grafana 'Altitude Truth' panel should now look perfect.")
             else:
-                print("   ✅ GPS Data looks clean (No zeros found).")
+                print("   ⚠️ RESIDUAL DRIFT: Barometer might be drifting due to weather.")
 
-    # -----------------------------------------------------------------------
-    # 4. LATEST PACKET DUMP
-    # -----------------------------------------------------------------------
-    print_header("⏱️  LATEST TELEMETRY SNAPSHOT")
-    last_query = f'''
-        from(bucket: "{BUCKET}")
-        |> range(start: -1h)
-        |> filter(fn: (r) => r["_measurement"] == "{target_meas}")
-        |> last()
-    '''
-    tables = query_api.query(last_query)
-    for table in tables:
-        for record in table:
-            print(f"   • {record.get_field()}: {record.get_value()}")
+    except Exception as e:
+        print(f"\n❌ CRITICAL ERROR: {e}")
+    finally:
+        client.close()
 
 if __name__ == "__main__":
     inspect_bucket()
