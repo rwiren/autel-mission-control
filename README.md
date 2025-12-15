@@ -33,18 +33,12 @@ Instead of the server "pulling" video (which often fails behind NATs/VPNs), the 
 
 * 🎥 **Active "Push" DVR:** Drone initiates the connection, pushing RTSP directly to the local MediaMTX server (TCP Port 8554).
 * 🛡️ **Crash-Resilient Recording:** Uses **Fragmented MP4 (fMP4)** storage. If the container crashes or power is cut, the video file is saved up to the last second (solving the "Moov Paradox").
-* 🛡️ **Network Jitter Buffer:** A 10-second buffer smooths out latency spikes common on LTE/ZeroTier connections, preventing recording gaps.
-* 📊 **Unified Telemetry Stack:** Integrated MQTT broker, Telegraf agent, InfluxDB, and Grafana for visualizing Battery, GPS, and Gimbal data.
+* 🛡️ **Network Jitter Buffer:** A 10-second buffer smooths out latency spikes common on LTE/5G/ZeroTier connections, preventing recording gaps.
+* 📊 **Unified Telemetry Stack:** Integrated MQTT broker, Telegraf agent, InfluxDB, and Grafana for visualizing drone data.
 * 🍎 **Apple Silicon Native:** Optimized for macOS ARM64 architecture with `host` networking mode for seamless ZeroTier integration.
 * 🕸️ **Web Dashboard Ready:** Automatically transmuxes RTSP feeds to **HLS (Port 8888)** for native browser playback in Grafana.
 
-## 🚀 Key Features
-
-* 🎥 **Dual-Lane Video Architecture:** Simultaneously supports low-latency **RTSP (TCP-locked)** for speed and high-reliability **RTMP** for challenging connection environments.
-* 🛡️ **Auto-Sanitization Bridge:** A dedicated microservice catches "dirty" RTMP streams from Autel drones (fixing metadata errors) and bridges them to standard protocols.
-* 🍎 **Apple Silicon Optimized:** Specifically engineered to bypass macOS Docker UDP packet loss issues using native ARM64 images and forced TCP transports.
-* 📊 **Full Telemetry Stack:** Integrated MQTT broker, Telegraf agent, and InfluxDB for time-series data storage.
-* 💻 **Web Dashboard Ready:** Outputs WebRTC and LL-HLS feeds for easy integration into browser-based frontends.
+---
 
 ## 🏗️ System Architecture
 
