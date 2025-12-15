@@ -99,7 +99,7 @@ This project includes a specialized **"Hardware Health" dashboard** (`src/dashbo
 ### Key Instruments:
 * **🛰️ Precision Lock (GNSS vs. RTK):**
     * Visualizes the satellite count delta between the standard consumer GPS module and the RTK (Real-Time Kinematic) module.
-    * **Goal:** Verify RTK "Fixed" status (typically 20+ sats) versus standard GPS float (10-12 sats) before takeoff.
+    * **Goal:** Verify RTK "Fixed" status (**observed 50+ satellites** in multi-constellation mode) versus standard GPS float (~12 sats) before takeoff.
 
 * **⛰️ Altitude Truth (Barometer vs. Geometry):**
     * Plots **Barometric Altitude** (pressure-based, susceptible to drift) against **RTK Ellipsoidal Height** (geometric truth).
