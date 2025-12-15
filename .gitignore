@@ -18,3 +18,13 @@ archive/
 # --- IDEs ---
 .vscode/
 .idea/
+
+# --- Data & Recordings ---
+recordings/*.mp4
+recordings/live/
+recordings/tmp/
+
+# --- Docker Volumes (if mapped locally) ---
+mosquitto/data/
+influxdb2_data/
+grafana_data/

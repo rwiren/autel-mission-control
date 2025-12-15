@@ -1,49 +1,62 @@
 #############################################################################
 # Project: Autel Mission Control
 # File: config/mediamtx.yml
-# Version: v0.9.1 (Production Config)
-# Description: 
-#   Configuration for the 'autel_rtsp' distributor.
-#   - Locks RTSP to TCP to bypass Mac/Docker firewall issues.
-#   - Enables internal RTMP listening to receive the Bridge stream.
+# Version: v3.6.0 (Wildcard DVR)
+# Date:    2025-12-15
+#
+# STRATEGY:
+# - Use the 'all' wildcard (Like v0.9.1) so the controller ALWAYS connects.
+# - Enable Recording on 'all' streams.
+# - Use 'fmp4' with 1-hour segments to simulate a Single File (Safe Mode).
 #############################################################################
 
 paths:
-  # Wildcard accepts:
-  # 1. live/rtsp-drone1 (Direct RTSP connection)
-  # 2. live/rtmp-drone1 (Bridged/Cleaned RTMP connection)
+  # ---------------------------------------------------------
+  # WILDCARD PATH (Accepts ANY stream name from Controller)
+  # ---------------------------------------------------------
   all:
+    # 1. AUTHENTICATION (Open)
+    readUser: ""
+    readPass: ""
+    
+    # 2. DVR RECORDING
+    record: yes
+    
+    # Path: recordings/path_name/DATE_TIME
+    # Note: %path is dynamic. If drone sends to 'live/rtsp-drone1', it saves there.
+    recordPath: ./recordings/%path/%Y-%m-%d_%H-%M-%S
+    
+    # Format: fmp4 (Crash-proof)
+    recordFormat: fmp4
+    
+    # Duration: 3600s (1 Hour)
+    # Result: ONE file per flight (unless you fly > 1 hour).
+    recordPartDuration: 3600s
+    
+    # Keep forever
+    recordDeleteAfter: 0s
 
 # ---------------------------------------------
-# RTSP SETTINGS (Lane 1)
+# GLOBAL SETTINGS (Identical to Working v0.9.1)
 # ---------------------------------------------
 rtsp: yes
 rtspAddress: :8554
-# CRITICAL: We force TCP transport. 
-# This prevents the "Session Timed Out" (Black Screen) error on Mac Docker.
 protocols: [tcp]
 
-# ---------------------------------------------
-# RTMP SETTINGS (Lane 2 Input)
-# ---------------------------------------------
-# Enabled to allow the 'autel_bridge' container to push video here.
 rtmp: yes
 rtmpAddress: :1935
 
-# ---------------------------------------------
-# WEB PLAYBACK (Dashboard Output)
-# ---------------------------------------------
 hls: yes
 hlsAddress: :8888
 hlsVariant: lowLatency
 
 webrtc: yes
 webrtcAddress: :8889
-# MANDATORY: Tells the browser the physical IP of the Mac.
-webrtcAdditionalHosts: [ "192.168.1.201" ]
+# MANDATORY: The ZeroTier IP of your M4 Max
+webrtcAdditionalHosts: [ "192.168.192.61" ]
 
 # ---------------------------------------------
-# STABILITY TUNING
+# TUNING (Identical to Working v0.9.1)
 # ---------------------------------------------
 readTimeout: 20s
 writeTimeout: 20s

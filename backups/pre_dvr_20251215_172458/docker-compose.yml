@@ -1,0 +1,119 @@
+version: '3.8'
+# ---------------------------------------------------------------------------
+# Project: Autel Mission Control
+# File: docker/docker-compose.yml
+# Version: v0.9.3 (Video Unlock & Auto-Provisioning)
+# Date: 2025-12-14
+# Description: 
+#   - Added 'GF_PANELS_DISABLE_SANITIZE_HTML' to allow iframe/video tags.
+#   - Added 'datasources.yml' mount for persistent InfluxDB connection.
+#   - Preserved Dual-Lane Video Architecture (RTSP/RTMP).
+# ---------------------------------------------------------------------------
+
+services:
+  # -------------------------------------------------------
+  # SERVICE 1: RTSP SERVER (The Distributor)
+  # -------------------------------------------------------
+  rtsp_server:
+    image: bluenviron/mediamtx:latest
+    container_name: autel_rtsp
+    restart: always
+    ports:
+      - "8554:8554"      # RTSP Ingest (Direct) & Playback
+      - "1936:1935"      # RTMP Internal Ingest (Mapped to 1936)
+      - "8888:8888"      # HLS Output
+      - "8889:8889"      # WebRTC Output
+      - "8189:8189/udp"  # WebRTC ICE
+    volumes:
+      - ../config/mediamtx.yml:/mediamtx.yml
+    environment:
+      - MTX_WEBRTCADDITIONALHOSTS=192.168.1.201
+
+  # -------------------------------------------------------
+  # SERVICE 2: RTMP INGEST (The Sanitizer)
+  # -------------------------------------------------------
+  rtmp_server:
+    image: tiangolo/nginx-rtmp
+    container_name: autel_rtmp
+    restart: always
+    ports:
+      - "1935:1935" # Public RTMP Port (Drone Input)
+
+  # -------------------------------------------------------
+  # SERVICE 3: STREAM BRIDGE (The Worker)
+  # -------------------------------------------------------
+  rtmp_bridge:
+    image: mwader/static-ffmpeg:latest
+    container_name: autel_bridge
+    restart: on-failure
+    depends_on:
+      - rtsp_server
+      - rtmp_server
+    command: >
+      -re -i rtmp://autel_rtmp:1935/live/rtmp-drone1
+      -c copy 
+      -f flv 
+      rtmp://autel_rtsp:1935/live/rtmp-drone1
+
+  # -------------------------------------------------------
+  # METRICS STACK
+  # -------------------------------------------------------
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: autel_broker
+    restart: always
+    ports: ["${MQTT_PORT}:1883", "9001:9001"]
+    volumes:
+      - ../config:/mosquitto/config
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+
+  influxdb:
+    image: influxdb:2
+    container_name: autel_influx
+    restart: always
+    ports: ["8086:8086"]
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUX_USER}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUX_PASS}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUX_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUX_BUCKET}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUX_TOKEN}
+    volumes:
+      - influxdb2_data:/var/lib/influxdb2
+
+  telegraf:
+    image: telegraf:1.29
+    container_name: autel_telegraf
+    restart: always
+    depends_on: [influxdb, mosquitto]
+    environment:
+      - INFLUX_TOKEN=${INFLUX_TOKEN}
+      - INFLUX_ORG=${INFLUX_ORG}
+      - INFLUX_BUCKET=${INFLUX_BUCKET}
+    volumes:
+      - ../config/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: autel_grafana
+    restart: always
+    ports: ["3000:3000"]
+    depends_on: [influxdb]
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASS}
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      # CRITICAL FOR VIDEO: Allows iframes and scripts in Text Panels
+      - GF_PANELS_DISABLE_SANITIZE_HTML=true
+    volumes:
+      - grafana_data:/var/lib/grafana
+      # CRITICAL FOR PERSISTENCE: Auto-configures InfluxDB connection
+      - ../config/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+
+volumes:
+  mosquitto_data:
+  mosquitto_log:
+  influxdb2_data:
+  grafana_data:

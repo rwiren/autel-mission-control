@@ -1,110 +1,51 @@
+import os
+import subprocess
+import shutil
+
 # ==============================================================================
-# Project: Autel Mission Control (Unified)
-# Version: 3.0.1 (Fix: Removed Invalid FFmpeg Flags)
-# Date:    2025-12-16
-# Description:
-#   - Telemetry Stack: Resumed.
-#   - Video Recorder: Fixed "Unrecognized option" crash.
+# Script: remove_playback_ui.py
+# Purpose: Removes the 'playback_server' (FileBrowser) from the stack.
+#          preserves the DVR recording capability in the RTSP server.
 # ==============================================================================
+
+COMPOSE_FILE = "docker/docker-compose.yml"
+BACKUP_FILE = "docker/docker-compose.yml.bak"
+
+# This is your Clean, Stable Architecture (v3.1.0) without the FileBrowser
+CLEAN_COMPOSE_CONTENT = """
 version: '3.8'
-
-networks:
-  autel_net:
-    driver: bridge
-
 services:
-
-  # --- 1. VIDEO CORE ---
-
-  # The Server: Drone Pushes Video Here
+  # --- VIDEO CORE (DVR HANDLED HERE) ---
   rtsp_server:
     image: bluenviron/mediamtx:latest
     container_name: autel_rtsp
     restart: always
-    networks:
-      - autel_net
+    user: "0:0"   # Root required for writing recordings
     ports:
-      - "8554:8554"       # RTSP (TCP)
-      - "1936:1935"       # RTMP Ingest
-      - "8888:8888"       # HLS
-      - "8889:8889"       # WebRTC
-      - "8189:8189/udp"   # WebRTC UDP
+      - "8554:8554"
+      - "1936:1935"
+      - "8888:8888"
+      - "8889:8889"
+      - "8189:8189/udp"
     volumes:
       - ../config/mediamtx.yml:/mediamtx.yml
+      - ../recordings:/recordings  # <--- Video saved here locally
     environment:
-      - MTX_PROTOCOLS=tcp
-      - MTX_WEBRTC=no
-      - MTX_READTIMEOUT=20s
+      - MTX_WEBRTCADDITIONALHOSTS=192.168.1.201
 
-  # The Recorder: Saves the Stream
-  recorder:
-    image: linuxserver/ffmpeg:latest
-    container_name: autel_recorder
-    restart: always
-    networks:
-      - autel_net
-    environment:
-      - PUID=501
-      - PGID=20
-      - TZ=Europe/Helsinki
-    volumes:
-      - ../recordings:/data/recordings
-    depends_on:
-      - rtsp_server
-    # ARRAY SYNTAX: Removed 'stimeout' to fix crash
-    command:
-      - "-y"
-      - "-hide_banner"
-      - "-loglevel"
-      - "info"
-      # Network Stability
-      - "-rtsp_transport"
-      - "tcp"
-      - "-use_wallclock_as_timestamps"
-      - "1"
-      - "-fflags"
-      - "+genpts+nobuffer"
-      - "-max_delay"
-      - "10000000"
-      # Input: Connects to the internal container name 'autel_rtsp'
-      - "-i"
-      - "rtsp://autel_rtsp:8554/live/rtsp-drone1"
-      # Output Settings
-      - "-c:v"
-      - "copy"
-      - "-c:a"
-      - "copy"
-      - "-f"
-      - "segment"
-      - "-segment_time"
-      - "900"
-      - "-segment_format"
-      - "mp4"
-      - "-segment_atclocktime"
-      - "1"
-      - "-strftime"
-      - "1"
-      - "-movflags"
-      - "frag_keyframe+empty_moov+default_base_moof"
-      - "/data/recordings/autel_evomax_%Y-%m-%d_%H%M%S.mp4"
-
-  # --- 2. LEGACY BRIDGES ---
-  
+  # --- RTMP INGEST ---
   rtmp_server:
     image: tiangolo/nginx-rtmp
     container_name: autel_rtmp
     restart: always
-    networks:
-      - autel_net
     ports:
       - "1935:1935"
 
+  # --- STREAM BRIDGE ---
   rtmp_bridge:
     image: mwader/static-ffmpeg:latest
     container_name: autel_bridge
     restart: on-failure
-    networks:
-      - autel_net
     depends_on:
       - rtsp_server
       - rtmp_server
@@ -114,17 +55,12 @@ services:
       -f flv 
       rtmp://autel_rtsp:1935/live/rtmp-drone1
 
-  # --- 3. METRICS STACK ---
-
+  # --- METRICS STACK ---
   mosquitto:
     image: eclipse-mosquitto:2
     container_name: autel_broker
     restart: always
-    networks:
-      - autel_net
-    ports: 
-      - "${MQTT_PORT}:1883"
-      - "9001:9001"
+    ports: ["${MQTT_PORT}:1883", "9001:9001"]
     volumes:
       - ../config:/mosquitto/config
       - mosquitto_data:/mosquitto/data
@@ -134,10 +70,7 @@ services:
     image: influxdb:2
     container_name: autel_influx
     restart: always
-    networks:
-      - autel_net
-    ports: 
-      - "8086:8086"
+    ports: ["8086:8086"]
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUX_USER}
@@ -152,8 +85,6 @@ services:
     image: telegraf:1.29
     container_name: autel_telegraf
     restart: always
-    networks:
-      - autel_net
     depends_on: [influxdb, mosquitto]
     environment:
       - INFLUX_TOKEN=${INFLUX_TOKEN}
@@ -166,10 +97,7 @@ services:
     image: grafana/grafana-oss:latest
     container_name: autel_grafana
     restart: always
-    networks:
-      - autel_net
-    ports: 
-      - "3000:3000"
+    ports: ["3000:3000"]
     depends_on: [influxdb]
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
@@ -185,3 +113,39 @@ volumes:
   mosquitto_log:
   influxdb2_data:
   grafana_data:
+"""
+
+def main():
+    print("✂️  REMOVING PLAYBACK UI (v3.1.0)...")
+
+    # 1. Stop the Annoying Container
+    print("\n[1/3] Stopping Playback Container...")
+    subprocess.run("docker stop autel_playback", shell=True)
+    subprocess.run("docker rm autel_playback", shell=True)
+    print("   ✅ Container removed.")
+
+    # 2. Update Infrastructure Config
+    print("\n[2/3] Updating Architecture...")
+    # Backup first
+    if os.path.exists(COMPOSE_FILE):
+        shutil.copy(COMPOSE_FILE, BACKUP_FILE)
+    
+    # Write Clean Config
+    with open(COMPOSE_FILE, "w") as f:
+        f.write(CLEAN_COMPOSE_CONTENT.strip())
+    print("   ✅ docker-compose.yml updated (Service removed).")
+
+    # 3. Clean Restart of Core
+    print("\n[3/3] Stabilizing Core Systems...")
+    # This ensures the rest of the stack knows the other guy is gone
+    subprocess.run("docker compose --env-file .env -f docker/docker-compose.yml up -d --remove-orphans", shell=True)
+
+    print("\n✅ DONE.")
+    print("   -------------------------------------------------")
+    print("   🌐 Dashboard:    http://localhost:3000")
+    print("   📹 Recordings:   Located in your folder 'autel-mission-control/recordings'")
+    print("   -------------------------------------------------")
+    print("   To view videos, simply open the folder in Finder!")
+
+if __name__ == "__main__":
+    main()

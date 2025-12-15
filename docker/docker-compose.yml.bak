@@ -1,0 +1,112 @@
+version: '3.8'
+services:
+  # --- VIDEO CORE ---
+  rtsp_server:
+    image: bluenviron/mediamtx:latest
+    container_name: autel_rtsp
+    restart: always
+    user: "0:0"   # <--- CRITICAL: Root permissions for DVR
+    ports:
+      - "8554:8554"
+      - "1936:1935"
+      - "8888:8888"
+      - "8889:8889"
+      - "8189:8189/udp"
+    volumes:
+      - ../config/mediamtx.yml:/mediamtx.yml
+      - ../recordings:/recordings  # <--- Persistent Storage
+    environment:
+      - MTX_WEBRTCADDITIONALHOSTS=192.168.1.201
+
+  # --- PLAYBACK UI (New!) ---
+  playback_server:
+    image: filebrowser/filebrowser:latest
+    container_name: autel_playback
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - ../recordings:/srv
+      - ../config/filebrowser.db:/filebrowser.db
+    # Default login: admin / admin
+
+  # --- RTMP INGEST ---
+  rtmp_server:
+    image: tiangolo/nginx-rtmp
+    container_name: autel_rtmp
+    restart: always
+    ports:
+      - "1935:1935"
+
+  # --- STREAM BRIDGE ---
+  rtmp_bridge:
+    image: mwader/static-ffmpeg:latest
+    container_name: autel_bridge
+    restart: on-failure
+    depends_on:
+      - rtsp_server
+      - rtmp_server
+    command: >
+      -re -i rtmp://autel_rtmp:1935/live/rtmp-drone1
+      -c copy 
+      -f flv 
+      rtmp://autel_rtsp:1935/live/rtmp-drone1
+
+  # --- METRICS STACK (Unchanged) ---
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: autel_broker
+    restart: always
+    ports: ["${MQTT_PORT}:1883", "9001:9001"]
+    volumes:
+      - ../config:/mosquitto/config
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+
+  influxdb:
+    image: influxdb:2
+    container_name: autel_influx
+    restart: always
+    ports: ["8086:8086"]
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUX_USER}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUX_PASS}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUX_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUX_BUCKET}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUX_TOKEN}
+    volumes:
+      - influxdb2_data:/var/lib/influxdb2
+
+  telegraf:
+    image: telegraf:1.29
+    container_name: autel_telegraf
+    restart: always
+    depends_on: [influxdb, mosquitto]
+    environment:
+      - INFLUX_TOKEN=${INFLUX_TOKEN}
+      - INFLUX_ORG=${INFLUX_ORG}
+      - INFLUX_BUCKET=${INFLUX_BUCKET}
+    volumes:
+      - ../config/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: autel_grafana
+    restart: always
+    ports: ["3000:3000"]
+    depends_on: [influxdb]
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASS}
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_PANELS_DISABLE_SANITIZE_HTML=true
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../config/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+
+volumes:
+  mosquitto_data:
+  mosquitto_log:
+  influxdb2_data:
+  grafana_data:

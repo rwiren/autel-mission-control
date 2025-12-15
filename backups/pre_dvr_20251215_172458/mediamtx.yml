@@ -1,0 +1,49 @@
+#############################################################################
+# Project: Autel Mission Control
+# File: config/mediamtx.yml
+# Version: v0.9.1 (Production Config)
+# Description: 
+#   Configuration for the 'autel_rtsp' distributor.
+#   - Locks RTSP to TCP to bypass Mac/Docker firewall issues.
+#   - Enables internal RTMP listening to receive the Bridge stream.
+#############################################################################
+
+paths:
+  # Wildcard accepts:
+  # 1. live/rtsp-drone1 (Direct RTSP connection)
+  # 2. live/rtmp-drone1 (Bridged/Cleaned RTMP connection)
+  all:
+
+# ---------------------------------------------
+# RTSP SETTINGS (Lane 1)
+# ---------------------------------------------
+rtsp: yes
+rtspAddress: :8554
+# CRITICAL: We force TCP transport. 
+# This prevents the "Session Timed Out" (Black Screen) error on Mac Docker.
+protocols: [tcp]
+
+# ---------------------------------------------
+# RTMP SETTINGS (Lane 2 Input)
+# ---------------------------------------------
+# Enabled to allow the 'autel_bridge' container to push video here.
+rtmp: yes
+rtmpAddress: :1935
+
+# ---------------------------------------------
+# WEB PLAYBACK (Dashboard Output)
+# ---------------------------------------------
+hls: yes
+hlsAddress: :8888
+hlsVariant: lowLatency
+
+webrtc: yes
+webrtcAddress: :8889
+# MANDATORY: Tells the browser the physical IP of the Mac.
+webrtcAdditionalHosts: [ "192.168.1.201" ]
+
+# ---------------------------------------------
+# STABILITY TUNING
+# ---------------------------------------------
+readTimeout: 20s
+writeTimeout: 20s
