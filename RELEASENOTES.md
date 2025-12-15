@@ -1,5 +1,25 @@
 # Release Notes
 
+## [v0.9.8] - 2025-12-16 ("The Push Update")
+**Status:** Stable / Beta
+
+### 💥 Major Architectural Shift: Push vs Pull
+* **Changed:** Switched from a "Pull-based" recorder to a "Push-based" architecture. The Autel Drone now initiates the RTSP connection to the server.
+* **Reason:** Solves "Connection Refused" and "404 Not Found" errors caused by ZeroTier NAT traversal and LTE carrier blocking.
+
+### 🚀 New Features
+* **Crash-Proof Recording:** Implemented `frag_keyframe+empty_moov` flags. Video files are now playable even if the container crashes or power is lost mid-recording.
+* **Auto-Segmentation:** Recordings are automatically split every 15 minutes (`-segment_time 900`) to contain file size and risk.
+* **Unified Stack:** Merged `rtsp`, `recorder`, `mqtt`, `influx`, and `grafana` into a single `docker-compose.yml` file for atomic deployments.
+* **Jitter Buffer:** Added a 10-second network buffer (`-max_delay 10000000`) to smooth out ZeroTier latency spikes.
+
+### 🐛 Bug Fixes
+* **Fixed:** "4-second file loop" caused by FFmpeg panicking on out-of-order packets.
+* **Fixed:** Grafana "Failed to Fetch" error by routing video through MediaMTX HLS (Port 8888) instead of raw RTSP.
+* **Fixed:** Docker "Invalid Command String" syntax error by converting FFmpeg commands to YAML Arrays.
+
+---
+
 ## [v0.9.5] - 2025-12-15 "The Infinity Link"
 ### 🚀 Major Connectivity Upgrade: ZeroTier SD-WAN
 * **Architecture Shift:** Replaced fragile local IP addressing with a **Global Virtual LAN (SD-WAN)**.
@@ -18,6 +38,8 @@
 ### 📦 New Artifacts
 * `src/dashboards/autel_engineering_v2.json`
 * `docs/zerotier_path_flow.png`
+
+---
 
 ## v0.9.1 (2025-12-14) - The Dual-Lane Update
 
