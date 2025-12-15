@@ -188,3 +188,11 @@ This topology allows the **Field Unit** (Drone + Controller) and **Mission Contr
     ```
 
 4.  **Verify Connectivity:** Access Grafana at `http://localhost:3000` and check container status with `docker ps`.
+
+---
+
+## 📚 References & Research
+
+* **Video Resilience Strategy:** [Solving Fragmented RTSP_MP4 Recordings.pdf](docs/Solving%20Fragmented%20RTSP_MP4%20Recordings.pdf) - Internal architecture document detailing the move to fMP4.
+* **Video Protocols:** [VIDEO_PROTOCOLS.md](docs/VIDEO_PROTOCOLS.md) - Comparison of RTSP vs RTMP.
+* **Autel Cloud API:** [SDK Reference](https://doc.autelrobotics.com/cloud_api/en/60/30/00/10/00) - MQTT topic definitions.
