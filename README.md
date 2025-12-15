@@ -9,7 +9,7 @@
 
 ---
 
-### 📢 🆕 Latest Updates: v0.9.5 released!
+### 📢 🆕 Latest Updates: v0.9.8 released!
 **[Click here to view the RELEASENOTES.md for detailed changelogs and architecture shifts.](RELEASENOTES.md)**
 
 ---
