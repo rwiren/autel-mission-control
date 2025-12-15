@@ -67,26 +67,29 @@ The v0.9.8 architecture unifies the video and telemetry pipelines into a single,
 
 ---
 
-## 📡 Connection Lanes & Usage
+## 📡 Connectivity & Usage
 
-> **Important:** Replace `<YOUR_IP>` with the actual LAN IP address of your host machine (e.g., `192.168.1.50`). Do **not** use `localhost` on the drone controller.
+> **Critical:** This system now operates on a **Push Model**. You must configure the Drone to send data to the server; the server will not "find" the drone automatically.
 
-**Technical Deep Dive:** Read **[docs/VIDEO_PROTOCOLS.md](docs/VIDEO_PROTOCOLS.md)** to understand the differencies between video protocols that Autel supports.
+### 1. The ZeroTier "Virtual Cable"
+This project relies on **ZeroTier** to create a static, encrypted tunnel between the Drone Controller and the Server, bypassing 4G/LTE NATs.
 
-### Lane 1: RTSP (Fast Lane - Low Latency)
-Connects directly to the main media server via TCP. Best for real-time piloting cues.
-* **Drone Controller Input:** `rtsp://<YOUR_IP>:8554/live/rtsp-drone1`
-* **VLC / Player Output:** `rtsp://<YOUR_IP>:8554/live/rtsp-drone1`
+![ZeroTier Data Flow](docs/zerotier_path_flow.png)
 
-### Lane 2: RTMP (Stable Lane - Sanitized)
-Ingested by NGINX, cleaned by the FFmpeg bridge, and delivered by the main server. Best for unreliable connections.
-* **Drone Controller Input:** `rtmp://<YOUR_IP>:1935/live/rtmp-drone1`
-* **VLC / Player Output (Cleaned):** `rtmp://<YOUR_IP>:1936/live/rtmp-drone1`
+### 2. Drone Configuration (The "Push")
+Configure the **Autel Enterprise App** (Live Stream settings) to push to these endpoints:
 
-### 💻 Web Dashboard Outputs
-Both lanes are instantly available for browser playback.
-* **WebRTC Feed (Lowest Latency):** `http://<YOUR_IP>:8889/live/rtsp-drone1` (or `rtmp-drone1`)
-* **LL-HLS Feed:** `http://<YOUR_IP>:8888/live/rtsp-drone1`
+* **Video (RTSP):** `rtsp://<SERVER_ZT_IP>:8554/live/rtsp-drone1`
+    * *Note:* Replace `<SERVER_ZT_IP>` with your server's ZeroTier IP (e.g., `192.168.192.61`).
+* **Telemetry (MQTT):** `<SERVER_ZT_IP>` (Port 1883)
+
+### 3. Mission Control Outputs (The "View")
+Access the live feeds from any device on the network:
+
+* **Web Dashboard (HLS):** `http://<SERVER_ZT_IP>:8888/live/rtsp-drone1/index.m3u8`
+    * *Best for:* Grafana, Safari, Chrome (Native HTML5 Playback).
+* **Low-Latency Feed (RTSP):** `rtsp://<SERVER_ZT_IP>:8554/live/rtsp-drone1`
+    * *Best for:* VLC, OBS Studio, Desktop Players.
 
 ---
 
