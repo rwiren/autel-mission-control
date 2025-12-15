@@ -17,9 +17,11 @@
 ## 📖 Table of Contents
 1.  [Project Overview](#-project-overview)
 2.  [Key Features](#-key-features)
-3.  [System Architecture](#%EF%B8%8F-system-architecture)
-4.  [Connection Lanes & Usage](#-connection-lanes--usage)
-5.  [Quick Start Deployment](#%EF%B8%8F-quick-start-deployment)
+3.  [System Architecture (Evolution)](#-system-architecture)
+4.  [Connectivity & Drone Config](#-connectivity--usage)
+5.  [Dashboards](#-mission-control--engineering-dashboards)
+6.  [Quick Start Deployment](#-quick-start-deployment)
+7.  [References](#-references--research)
 
 ---
 
@@ -69,10 +71,10 @@ The v0.9.8 architecture unifies the video and telemetry pipelines into a single,
 
 ## 📡 Connectivity & Usage
 
-> **Critical:** This system now operates on a **Push Model**. You must configure the Drone to send data to the server; the server will not "find" the drone automatically.
+> **Critical:** This system operates on a **Push Model**. You must configure the Drone to send data to the server; the server will not "find" the drone automatically.
 
 ### 1. The ZeroTier "Virtual Cable"
-This project relies on **ZeroTier** to create a static, encrypted tunnel between the Drone Controller and the Server, bypassing 4G/LTE NATs.
+Unlike standard setups that break when you switch networks, this project uses **ZeroTier** to create a static, encrypted tunnel.
 
 ![ZeroTier Data Flow](docs/zerotier_path_flow.png)
 
@@ -80,71 +82,30 @@ This project relies on **ZeroTier** to create a static, encrypted tunnel between
 Configure the **Autel Enterprise App** (Live Stream settings) to push to these endpoints:
 
 * **Video (RTSP):** `rtsp://<SERVER_ZT_IP>:8554/live/rtsp-drone1`
-    * *Note:* Replace `<SERVER_ZT_IP>` with your server's ZeroTier IP (e.g., `192.168.192.61`).
 * **Telemetry (MQTT):** `<SERVER_ZT_IP>` (Port 1883)
 
 ### 3. Mission Control Outputs (The "View")
-Access the live feeds from any device on the network:
-
-* **Web Dashboard (HLS):** `http://<SERVER_ZT_IP>:8888/live/rtsp-drone1/index.m3u8`
-    * *Best for:* Grafana, Safari, Chrome (Native HTML5 Playback).
-* **Low-Latency Feed (RTSP):** `rtsp://<SERVER_ZT_IP>:8554/live/rtsp-drone1`
-    * *Best for:* VLC, OBS Studio, Desktop Players.
+* **Web Dashboard (HLS):** `http://<SERVER_ZT_IP>:8888/live/rtsp-drone1/index.m3u8` (Best for Grafana/Browser)
+* **Low-Latency (RTSP):** `rtsp://<SERVER_ZT_IP>:8554/live/rtsp-drone1` (Best for VLC)
 
 ---
 
-### 💻 Mission Control & Engineering Dashboards
-The system includes a "Golden Image" Grafana dashboard (**[docs/autel_dashboard_v3.json](docs/autel_dashboard_v3.json)**) that unifies real-time video, tactical mapping, and hardware diagnostics into a single "Glass Cockpit."
+## 💻 Mission Control & Engineering Dashboards
+The system includes a "Golden Image" Grafana dashboard (**[docs/autel_dashboard_v3.json](docs/autel_dashboard_v3.json)**) that unifies real-time video, tactical mapping, and hardware diagnostics.
 
-#### 1. The Tactical View (Evolution)
-*This view combines live video with a geospatial map for situational awareness.*
+### 1. The Tactical View
+*Combines live video (HLS) with a geospatial map for situational awareness.*
 
 ![Mission Control Dashboard](docs/archive/mission-control-dashboard.png)
 
-* **Left Panel (Visual):**
-    * **Source:** MediaMTX HLS Feed.
-    * **Tech:** HLS (Port 8888) for native browser compatibility.
-    * **Configuration:** No plugins required; uses standard Grafana News/Text panels or dedicated Video plugins pointing to `http://<IP>:8888/live/rtsp-drone1/index.m3u8`.
-* **Right Panel (Tactical):**
-    * **Source:** InfluxDB (via Telegraf/MQTT).
-    * **Tech:** Geomap with Route Layer + Drone Marker.
-
----
-
-#### 2. The Engineering View (Hardware Forensics)
-*Designed for pre-flight checks, this view exposes raw sensor comparisons to detect hardware drift.*
+### 2. The Engineering View (Hardware Forensics)
+*Exposes raw sensor comparisons to detect hardware drift.*
 
 ![Engineering Dashboard](docs/archive/autel_dashboard2.png)
 
-* **🛰️ Precision Lock:** Visualizes the delta between GNSS and RTK satellite counts (Goal: 50+ sats).
-* **⛰️ Altitude Truth:** Plots Barometric (Pressure) vs. Ellipsoidal (Geometric) height to detect sensor drift.
-* **🔋 Battery Load Profiling:** High-resolution voltage monitoring to identify "Voltage Sag" under throttle load.
-* **📡 Digital Signal Analyzer:** Discrete step-graph of the SDR link quality (0-5 scale).
-
----   
-
-## 📊 Engineering & Telemetry Dashboard
-This project includes a specialized **"Hardware Health" dashboard** (`src/dashboards/autel_engineering_v2.json`) designed for pre-flight checks and post-flight data forensics. Unlike standard flight apps, this view exposes raw sensor comparisons to detect hardware drift or failure.
-
-![Engineering Dashboard](docs/autel_dashboard2.png)
-
-### Key Instruments:
-* **🛰️ Precision Lock (GNSS vs. RTK):**
-    * Visualizes the satellite count delta between the standard consumer GPS module and the RTK (Real-Time Kinematic) module.
-    * **Goal:** Verify RTK "Fixed" status (**observed 50+ satellites** in multi-constellation mode) versus standard GPS float (~12 sats) before takeoff.
-
-* **⛰️ Altitude Truth (Barometer vs. Geometry):**
-    * Plots **Barometric Altitude** (pressure-based, susceptible to drift) against **RTK Ellipsoidal Height** (geometric truth).
-    * **Goal:** Detect pressure sensor drift or calibration errors in real-time by observing divergence between the solid (RTK) and dashed (Baro) lines.
-
-* **🔋 Battery Load Profiling:**
-    * High-resolution voltage monitoring (mV precision) converted to Volts.
-    * **Goal:** Identify "Voltage Sag" under load. A steep dip during throttle punches indicates rising internal resistance (aging battery) even if the reported percentage remains high.
-
-* **📡 Digital Signal Analyzer:**
-    * Discrete step-graph of the SDR (Software Defined Radio) link quality (0-5 scale).
-    * **Goal:** Visualize digital packet loss and signal degradation steps rather than a smoothed average, providing an instant "Go/No-Go" link status.
-
+* **🛰️ Precision Lock:** Visualizes GNSS vs. RTK satellite count delta (Goal: 50+ sats).
+* **⛰️ Altitude Truth:** Plots Barometric vs. Ellipsoidal height to detect pressure drift.
+* **🔋 Battery Profiling:** Monitors voltage sag under throttle load.
 ---  
 
 ### 📂 Repository Structure
