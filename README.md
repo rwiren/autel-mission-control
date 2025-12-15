@@ -112,21 +112,20 @@ The system includes a "Golden Image" Grafana dashboard (**[docs/autel_dashboard_
 
 ```text
 .
-├── config/                  # Service configurations
-│   ├── mediamtx.yml         # MediaMTX rules (TCP locking, paths)
-│   ├── mosquitto.conf       # MQTT broker settings
-│   └── telegraf.conf        # Telegraf data collector config
+├── config/                  # Service configurations (MediaMTX, Telegraf)
 ├── docker/
-│   └── docker-compose.yml   # The V0.9.1 Microservices Stack
-├── docs/                    # Architecture diagrams & protocol notes
-├── scripts/                 # Management utilities (Reset DB, Monitor)
-├── src/
-│   └── dashboards/          # Frontend resources
-│       ├── autel_telemetry_master.json  # Grafana Dashboard (Importable)
-│       └── video_panel.html             # Standalone WebRTC Viewer
+│   └── docker-compose.yml   # The Unified v0.9.8 Stack
+├── docs/                    # Architecture (v3), Golden Dashboards, & Research
+│   ├── archive/             # Deprecated diagrams and v2 layouts
+│   ├── architecture_v3.png  # Current System Flow
+│   └── autel_dashboard_v3.json # Production Grafana Dashboard
+├── recordings/              # Auto-segmented video files (15-min chunks)
+├── scripts/                 # Operational utilities (Infra management, Monitors)
+├── src/                     # Python helper modules & Legacy dashboards
 ├── LICENSE
 ├── README.md                # This file
-└── RELEASENOTES.md          # Version history and changelog
+├── RELEASENOTES.md          # Version history
+└── .env.example             # Template for secrets
 ```
 
 ---
