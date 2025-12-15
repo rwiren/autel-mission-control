@@ -51,7 +51,6 @@ The v0.9.1 architecture utilized a microservices approach to ensure stability. V
 
 [![v0.9.1 Dual-Lane Architecture](docs/Decision%20Path%20Selection%20Flow-2025-12-14-132635.png)](docs/Decision%20Path%20Selection%20Flow-2025-12-14-132635.png)
 
-## 🏗️ System Architecture
 
 The v0.9.8 architecture unifies the video and telemetry pipelines into a single, atomic Docker stack, replacing the previous microservices web.
 
