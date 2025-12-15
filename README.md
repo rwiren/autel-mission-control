@@ -93,25 +93,33 @@ Access the live feeds from any device on the network:
 
 ---
 
-### 💻 Mission Control Dashboard
-The system outputs a unified "Glass Cockpit" interface, combining low-latency video with real-time tactical mapping.
+### 💻 Mission Control & Engineering Dashboards
+The system includes a "Golden Image" Grafana dashboard (**[docs/autel_dashboard_v3.json](docs/autel_dashboard_v3.json)**) that unifies real-time video, tactical mapping, and hardware diagnostics into a single "Glass Cockpit."
 
-![Mission Control Dashboard](https://github.com/rwiren/autel-mission-control/blob/main/docs/mission-control-dashboard.png)
+#### 1. The Tactical View (Evolution)
+*This view combines live video with a geospatial map for situational awareness.*
 
+![Mission Control Dashboard](docs/archive/mission-control-dashboard.png)
 
 * **Left Panel (Visual):**
-    * **Source:** `autel_rtsp` container.
-    * **Tech:** WebRTC (Port 8889) for <500ms latency.
-    * **Config:** `GF_PANELS_DISABLE_SANITIZE_HTML=true` allows direct video embedding.
-
+    * **Source:** MediaMTX HLS Feed.
+    * **Tech:** HLS (Port 8888) for native browser compatibility.
+    * **Configuration:** No plugins required; uses standard Grafana News/Text panels or dedicated Video plugins pointing to `http://<IP>:8888/live/rtsp-drone1/index.m3u8`.
 * **Right Panel (Tactical):**
-    * **Source:** `autel_influx` container (via MQTT/Telegraf).
-    * **Tech:** Grafana Geomap with Dual Layers (Route Line + Drone Icon).
-    * **Data:** Visualizes real-time GPS telemetry (`lat`/`lon`) filtered to remove null island errors.
+    * **Source:** InfluxDB (via Telegraf/MQTT).
+    * **Tech:** Geomap with Route Layer + Drone Marker.
 
-**Access Feeds Directly:**
-* **WebRTC Feed:** `http://<YOUR_IP>:8889/live/rtsp-drone1`
-* **HLS Feed:** `http://<YOUR_IP>:8888/live/rtsp-drone1`
+---
+
+#### 2. The Engineering View (Hardware Forensics)
+*Designed for pre-flight checks, this view exposes raw sensor comparisons to detect hardware drift.*
+
+![Engineering Dashboard](docs/archive/autel_dashboard2.png)
+
+* **🛰️ Precision Lock:** Visualizes the delta between GNSS and RTK satellite counts (Goal: 50+ sats).
+* **⛰️ Altitude Truth:** Plots Barometric (Pressure) vs. Ellipsoidal (Geometric) height to detect sensor drift.
+* **🔋 Battery Load Profiling:** High-resolution voltage monitoring to identify "Voltage Sag" under throttle load.
+* **📡 Digital Signal Analyzer:** Discrete step-graph of the SDR link quality (0-5 scale).
 
 ---   
 
