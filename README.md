@@ -94,7 +94,7 @@ The system outputs a unified "Glass Cockpit" interface, combining low-latency vi
 ## 📊 Engineering & Telemetry Dashboard
 This project includes a specialized **"Hardware Health" dashboard** (`src/dashboards/autel_engineering_v2.json`) designed for pre-flight checks and post-flight data forensics. Unlike standard flight apps, this view exposes raw sensor comparisons to detect hardware drift or failure.
 
-![Engineering Dashboard](docs/dashboard_engineering_v2.png)
+![Engineering Dashboard](docs/autel_dashboard2.png)
 
 ### Key Instruments:
 * **🛰️ Precision Lock (GNSS vs. RTK):**
