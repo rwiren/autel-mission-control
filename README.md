@@ -112,7 +112,7 @@ The system includes a "Golden Image" Grafana dashboard (**[docs/autel_dashboard_
 │   └── docker-compose.yml   # The Unified v0.9.8 Stack
 ├── docs/                    # Architecture (v3), Golden Dashboards, & Research
 │   ├── archive/             # Deprecated diagrams and v2 layouts
-│   ├── architecture_v3.png  # Current System Flow
+│   ├── architecture_v4.png  # Current System Flow
 │   └── autel_dashboard_v3.json # Production Grafana Dashboard
 ├── recordings/              # Auto-segmented video files (15-min chunks)
 ├── scripts/                 # Operational utilities (Infra management, Monitors)
