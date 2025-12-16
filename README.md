@@ -156,4 +156,4 @@ The system includes a "Golden Image" Grafana dashboard (**[docs/autel_dashboard_
 * - Internal architecture document detailing the move to fMP4.
 * **Video Protocols:** [VIDEO_PROTOCOLS.md](docs/VIDEO_PROTOCOLS.md) - Simplified comparison of video protocols.
 * **Autel Cloud API:** [SDK Reference](https://doc.autelrobotics.com/cloud_api/en/60/30/00/10/00) - MQTT topic definitions.
-* **Telemetry Schema:** [DATA_SCHEMA.md](docs/DATA_SCHEMA.md) - **(NEW)** Complete definition of all 50+ telemetry fields (RTK, Cells, Radar).
+* **Telemetry Schema:** [DATA_SCHEMA.md](docs/DATA_SCHEMA.md) - **(NEW)** Definition of 50+ telemetry fields (RTK, Cells, Radar etc.).
