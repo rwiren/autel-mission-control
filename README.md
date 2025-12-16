@@ -44,23 +44,18 @@ Instead of the server "pulling" video (which often fails behind NATs/VPNs), the 
 
 ## 🏗️ System Architecture
 
-The v0.9.1 architecture utilized a microservices approach to ensure stability. Video responsibilities are split into three distinct containers to prevent failure in one protocol from affecting the other.
+
 
 ---
 
 ### Visual Overview
-*(Click the diagram below to enlarge)*
-
-[![v0.9.1 Dual-Lane Architecture](docs/Decision%20Path%20Selection%20Flow-2025-12-14-132635.png)](docs/Decision%20Path%20Selection%20Flow-2025-12-14-132635.png)
-
 
 The v0.9.8 architecture unifies the video and telemetry pipelines into a single, atomic Docker stack, replacing the previous microservices web.
 
 ### Visual Overview
 *(Click the diagram below to enlarge)*
 
-
-[![v0.9.8 Push Architecture](docs/architecture_v3.png)](docs/architecture_v3.png)
+[![v0.9.8 Push Architecture](docs/architecture_v3.png)](docs/architecture_v4.png)
 
 ### The Pipeline
 1.  **Ingest (The "Push"):** `bluenviron/mediamtx` (TCP Port 8554) acts as the passive receiver for the Drone's RTSP connection.
