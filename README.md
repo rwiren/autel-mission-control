@@ -91,12 +91,12 @@ The system includes a "Golden Image" Grafana dashboard (**[docs/autel_dashboard_
 ### 1. The Tactical View
 *Combines live video (HLS) with a geospatial map for situational awareness.*
 
-![Mission Control Dashboard](docs/archive/mission-control-dashboard.png)
+![Mission Control Dashboard](https://github.com/rwiren/autel-mission-control/blob/main/docs/mission-control-dashboard.png)
 
 ### 2. The Engineering View (Hardware Forensics)
 *Exposes raw sensor comparisons to detect hardware drift.*
 
-![Engineering Dashboard](docs/archive/autel_dashboard2.png)
+![Engineering Dashboard](https://github.com/rwiren/autel-mission-control/blob/main/docs/autel_dashboard2.png)
 
 * **🛰️ Precision Lock:** Visualizes GNSS vs. RTK satellite count delta (Goal: 50+ sats).
 * **⛰️ Altitude Truth:** Plots Barometric vs. Ellipsoidal height to detect pressure drift.
