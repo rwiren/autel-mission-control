@@ -55,7 +55,7 @@ The v0.9.8 architecture unifies the video and telemetry pipelines into a single,
 ### Visual Overview
 *(Click the diagram below to enlarge)*
 
-[![v0.9.8 Push Architecture](docs/architecture_v3.png)](docs/architecture_v4.png)
+[![v0.9.8 Push Architecture](docs/architecture_v4.png)](docs/architecture_v4.png)
 
 ### The Pipeline
 1.  **Ingest (The "Push"):** `bluenviron/mediamtx` (TCP Port 8554) acts as the passive receiver for the Drone's RTSP connection.
