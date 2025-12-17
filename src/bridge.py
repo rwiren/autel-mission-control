@@ -4,9 +4,9 @@ Script Name: bridge.py
 Description: Core Telemetry Bridge for Autel Max 4T.
              Intercepts UDP broadcast packets, decodes binary/JSON structures,
              Normalizes data into a standard schema, and publishes to MQTT.
-Version:     1.1.2 (Fix: Added socket timeout for clean shutdown)
-Author:      System Architect
-Date:        2025-12-14
+Version:     1.2.0 (Fix: Added RTK FIX status handling)
+Author:      RW
+Date:        2025-12-17
 -----------------------------------------------------------------------------
 """
 
@@ -54,7 +54,7 @@ class TelemetryBridge:
     def connect_mqtt(self):
         """Establish connection to the MQTT Broker."""
         try:
-            self.mqtt_client = mqtt.Client(client_id="autel_bridge_v1.1", protocol=mqtt.MQTTv311)
+            self.mqtt_client = mqtt.Client(client_id="autel_bridge_v1.2", protocol=mqtt.MQTTv311)
             self.mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
             self.mqtt_client.loop_start()
             logger.info(f"✅ MQTT Connected: {MQTT_BROKER}:{MQTT_PORT}")
@@ -95,9 +95,18 @@ class TelemetryBridge:
             normalized['lon'] = round(float(data.get('longitude', 0)), 6)
             normalized['alt'] = round(float(data.get('height', 0)), 2)
             
+            # --- RTK STATUS LOGIC ---
             pos = data.get('position_state', {})
             normalized['sat_count'] = int(pos.get('gps_number', 0))
-            normalized['rtk_status'] = "FLOAT" if pos.get('rtk_inpos', 0) == 1 else "NONE"
+            
+            rtk_val = pos.get('rtk_inpos', 0)
+            if rtk_val == 2:
+                normalized['rtk_status'] = "FIX"    # High Precision (CM level)
+            elif rtk_val == 1:
+                normalized['rtk_status'] = "FLOAT"  # Medium Precision
+            else:
+                normalized['rtk_status'] = "NONE"   # Standard GPS
+
             normalized['heading'] = round(float(data.get('attitude_head', 0)), 2)
 
         # --- PATH B: DATA FROM CONTROLLER ---
