@@ -87,42 +87,10 @@ The system includes a "Golden Image" Grafana dashboard (**[docs/autel_dashboard_
 ### 1. The Tactical View
 *Combines live video (HLS) with a geospatial map for situational awareness.*
 
-![Mission Control Dashboard](https://github.com/rwiren/autel-mission-control/blob/main/docs/mission-control-dashboard.png)
-
----
-
-## 📸 System Preview
-
 ![Live Mission Control](docs/live_dashboard.png)
 *Real-time view showing RTSP Video Feed (Left) and Live Telemetry Map Trace (Right) during highway flight tests.*
 
 ---
-
-## 🏗️ System Architecture
-
-The system is composed of two main subsystems: **Infrastructure (Docker)** and **Ingestion (Python Bridge)**.
-
-### 1. The Stack (Docker)
-| Service | Function | Port |
-| :--- | :--- | :--- |
-| **MediaMTX** | Low-latency RTSP/RTMP Video Server | `8554` (RTSP), `1935` (RTMP) |
-| **Mosquitto** | MQTT Broker for telemetry messaging | `1883` |
-| **InfluxDB** | Time-series database for flight logs | `8086` |
-| **Telegraf** | Data collector (MQTT -> InfluxDB) | N/A |
-| **Grafana** | Mission Control Dashboard | `3000` |
-
-### 2. The Bridge (Python)
-A custom script (`src/bridge.py`) that acts as the translation layer. It listens for Autel's proprietary UDP broadcasts, normalizes the data (fixing coordinate precision and RTK status), and publishes standard JSON to the MQTT Broker.
-
----
-
-## 🚀 Quick Start Deployment
-
-### Prerequisites
-* Docker & Docker Compose
-* Python 3.12+ (Virtual Environment recommended)
-* ZeroTier (for remote connection)
-
 
 ### 2. The Engineering View (Hardware Forensics)
 *Exposes raw sensor comparisons to detect hardware drift.*
