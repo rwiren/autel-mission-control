@@ -88,7 +88,7 @@ The system includes a "Golden Image" Grafana dashboard (**[docs/autel_dashboard_
 *Combines live video (HLS) with a geospatial map for situational awareness.*
 
 ![Live Mission Control](docs/live_dashboard.png)
-*Real-time view showing RTSP Video Feed (Left) and Live Telemetry Map Trace (Right) during highway flight tests.*
+*Real-time view showing RTSP Video Feed (Left) and Live Telemetry Map Trace (Right) during flight tests.*
 
 ---
 
