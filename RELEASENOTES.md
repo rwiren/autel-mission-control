@@ -1,5 +1,30 @@
 # Release Notes
 
+## v1.0.0 - "The Field Hardened Release" (2025-12-18)
+**Status:** Stable Production Release  
+**Architect:** RW
+
+### 🚀 Milestone Summary
+This release marks the transition from "Engineering Prototype" to **Stable Field System**. The platform has been successfully validated in real-world highway flight tests, demonstrating sub-second video latency and precise telemetry tracking (RTK FIX) over ZeroTier.
+
+### ✨ New Features
+* **Live Dashboard Integration:** Added `live_dashboard.png` proving simultaneous Video + Telemetry synchronization.
+* **RTK Precision Logic:** Updated `bridge.py` (v1.2.0) to correctly interpret Autel RTK states:
+    * `1` = FLOAT (Medium Accuracy)
+    * `2` = FIX (Centimeter Accuracy)
+* **Dual-Lane Video Config:** Finalized support for both RTSP (Port 8554) and RTMP (Port 1935) ingest pipelines.
+* **Persistent Infrastructure:** Docker Compose volumes now strictly mapped to local host folders to prevent data loss on restarts.
+
+### 🐛 Bug Fixes
+* **Grafana Login Loop:** Resolved issue where container recreations reset admin passwords; reverted to `.env` file source of truth.
+* **Zombie Containers:** Fixed naming conflict between `autel_media` and `autel_rtsp` that caused port binding errors.
+* **Choppy Video:** Documented "Standard/720p" bitrate requirement for smooth ZeroTier transmission.
+
+### 📦 Artifacts
+* **Golden Dashboard:** `docs/autel_dashboard_v3.json`
+* **Bridge Script:** `src/bridge.py` (v1.2.0)
+
+
 ## [v0.9.8] - 2025-12-16 ("The Push Update")
 **Status:** Stable / Beta
 
