@@ -9,8 +9,8 @@
 
 ---
 
-### 📢 🆕 Latest Updates: v0.9.8 released!
-**[Click here to view the RELEASENOTES.md for detailed changelogs and architecture shifts.](RELEASENOTES.md)**
+### 📢 Milestone Reached: v1.0.0 Stable
+**[Click here to view the RELEASENOTES.md for the v1.0.0 changelog.](RELEASENOTES.md)**
 
 ---
 
