@@ -1,16 +1,17 @@
 # Autel Mission Control
 
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)]()
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Docker%20%7C%20Mac%20Silicon-lightgrey.svg)]()
 ![Last Updated](https://img.shields.io/github/last-commit/rwiren/autel-mission-control?label=Last%20Updated&color=orange)
 
-> **A centralized mission control hub for Autel drones, delivering specialized dual-lane real-time video streaming and comprehensive telemetry logging via Docker.**
+> **A centralized mission control hub for Autel and DJI enterprise drones, delivering specialized dual-lane real-time video streaming and comprehensive telemetry logging via Docker.**
 
 ---
 
-### 📢 Milestone Reached: v1.0.0 Stable
-**[Click here to view the RELEASENOTES.md for the v1.0.0 changelog.](RELEASENOTES.md)**
+### 📢 Latest Release: v1.1.0
+**[Click here to view the RELEASENOTES.md for the full changelog.](RELEASENOTES.md)**
 
 ---
 
@@ -21,7 +22,8 @@
 4.  [Connectivity & Drone Config](#-connectivity--usage)
 5.  [Dashboards](#-mission-control--engineering-dashboards)
 6.  [Quick Start Deployment](#-quick-start-deployment)
-7.  [References](#-references--research)
+7.  [Operational Scripts](#-operational-scripts)
+8.  [References](#-references--research)
 
 ---
 
@@ -106,21 +108,73 @@ The system includes a "Golden Image" Grafana dashboard (**[docs/autel_dashboard_
 
 ```text
 .
-├── config/                  # Service configurations (MediaMTX, Telegraf)
+├── config/                  # Service configurations (MediaMTX, Telegraf, Mosquitto)
 ├── docker/
 │   └── docker-compose.yml   # The Unified v0.9.8 Stack
-├── docs/                    # Architecture (v3), Golden Dashboards, & Research
-│   ├── archive/             # Deprecated diagrams and v2 layouts
-│   ├── architecture_v4.png  # Current System Flow
-│   └── autel_dashboard_v3.json # Production Grafana Dashboard
+├── docs/                    # Architecture, Golden Dashboards, & Research
+│   ├── DATA_SCHEMA.md           # Autel telemetry field reference
+│   ├── DJI_DATA_SCHEMA.md       # DJI Cloud API telemetry field reference
+│   ├── DRONELINK_DATA_SCHEMA.md # Dronelink cross-platform schema
+│   ├── LITCHI_DATA_SCHEMA.md    # Litchi CSV export field reference
+│   ├── architecture_v4.png      # Current System Flow
+│   └── autel_dashboard_v3.json  # Production Grafana Dashboard
 ├── recordings/              # Auto-segmented video files (15-min chunks)
-├── scripts/                 # Operational utilities (Infra management, Monitors)
+├── scripts/
+│   ├── autel/               # (root-level scripts are all Autel)
+│   │   ├── flight_recorder.py       # MQTT → JSONL log recorder
+│   │   ├── monitor_mqtt.py          # Live packet inspector
+│   │   ├── capture_mqtt_schema.py   # Deep-merge schema sniffer
+│   │   ├── inspect_telemetry.py     # InfluxDB telemetry auditor
+│   │   ├── replay_mission.py        # Mission replay for dashboard testing
+│   │   ├── generate_schema_report.py# InfluxDB schema report generator
+│   │   ├── manage_infra.sh          # Docker stack manager
+│   │   └── reset_db.sh              # InfluxDB bucket reset
+│   └── dji/                 # DJI Cloud API equivalent scripts
+│       ├── flight_recorder.py
+│       ├── monitor_mqtt.py
+│       ├── capture_mqtt_schema.py
+│       ├── inspect_telemetry.py
+│       ├── replay_mission.py
+│       ├── generate_schema_report.py
+│       ├── manage_infra.sh
+│       └── reset_db.sh
 ├── src/                     # Python helper modules & Legacy dashboards
 ├── LICENSE
 ├── README.md                # This file
 ├── RELEASENOTES.md          # Version history
 └── .env.example             # Template for secrets
 ```
+
+---
+
+## 🛠️ Operational Scripts
+
+Both Autel and DJI workflows share the same set of utility scripts. Each
+lives in its respective subdirectory under `scripts/`.
+
+| Script | Purpose |
+| :--- | :--- |
+| `flight_recorder.py` | Subscribes to MQTT and writes every telemetry packet to a timestamped JSONL file. Run during every flight. |
+| `monitor_mqtt.py` | Pretty-prints live MQTT traffic to the terminal. Use for quick integration checks. |
+| `capture_mqtt_schema.py` | Listens for 60 s and deep-merges all received JSON into a single schema file (`docs/*_raw_schema.json`). Run once per new firmware version. |
+| `inspect_telemetry.py` | Connects to InfluxDB and runs RTK vs barometric altitude analysis to validate calibration. |
+| `replay_mission.py` | Writes a sample flight path into InfluxDB in a loop. Use for dashboard UI testing without a live drone. |
+| `generate_schema_report.py` | Queries InfluxDB schema and dumps a JSON report used for Grafana panel mapping. |
+| `manage_infra.sh` | Tears down and restarts the Docker stack, then waits for MQTT health check. |
+| `reset_db.sh` | Wipes and recreates the InfluxDB telemetry bucket (prompts for confirmation). |
+
+### DJI-specific configuration
+
+| Parameter | Default |
+| :--- | :--- |
+| InfluxDB Org | `dji_ops` |
+| InfluxDB Bucket | `drone_telemetry` |
+| MQTT Topic | `thing/product/+/osd` |
+| InfluxDB Container | `dji_influx` |
+
+> **Security note:** All scripts read the InfluxDB token from the
+> `INFLUX_TOKEN` environment variable. Never commit a real token to source
+> control — use the `.env` file pattern shown in Quick Start.
 
 ---
 
