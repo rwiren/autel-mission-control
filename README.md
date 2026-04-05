@@ -155,4 +155,8 @@ The system includes a "Golden Image" Grafana dashboard (**[docs/autel_dashboard_
 * - Internal architecture document detailing the move to fMP4.
 * **Video Protocols:** [VIDEO_PROTOCOLS.md](docs/VIDEO_PROTOCOLS.md) - Simplified comparison of video protocols.
 * **Autel Cloud API:** [SDK Reference](https://doc.autelrobotics.com/cloud_api/en/60/30/00/10/00) - MQTT topic definitions.
-* **Telemetry Schema:** [DATA_SCHEMA.md](docs/DATA_SCHEMA.md) - **(NEW)** Definition of 50+ telemetry fields (RTK, Cells, Radar etc.).
+* **Telemetry Schemas:**
+  * 🟠 **Autel** — [DATA_SCHEMA.md](docs/DATA_SCHEMA.md) — 50+ MQTT telemetry fields (RTK, Smart Battery, Radar, etc.)
+  * 🔵 **DJI** — [DJI_DATA_SCHEMA.md](docs/DJI_DATA_SCHEMA.md) — DJI Cloud API MQTT fields (Matrice 30T, 350 RTK, Mavic 3E)
+  * 🟢 **Dronelink** — [DRONELINK_DATA_SCHEMA.md](docs/DRONELINK_DATA_SCHEMA.md) — Normalized cross-platform telemetry (DJI + Autel + Parrot)
+  * 🟣 **Litchi** — [LITCHI_DATA_SCHEMA.md](docs/LITCHI_DATA_SCHEMA.md) — CSV flight log export field reference (all Litchi-supported DJI drones)
