@@ -104,10 +104,9 @@ def replay():
                 print(f"   ⚠️  Sent BAD packet (0.0, 0.0) — verify Grafana ignores it.")
             else:
                 print(
-                    f"   📡 lat={packet['latitude']:.6f}  "
-                    f"lon={packet['longitude']:.6f}  "
-                    f"alt={packet['height']:.1f}m  "
-                    f"rtk={packet['rtk_state']}"
+                    f"   📡 alt={packet['height']:.1f}m  "
+                    f"rtk_state={packet['rtk_state']}  "
+                    f"speed={packet['horizontal_speed']:.1f}m/s"
                 )
 
             time.sleep(1)
