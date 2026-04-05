@@ -1,5 +1,37 @@
 # Release Notes
 
+## v1.1.0 - "DJI Parity Release" (2026-04-05)
+**Status:** Stable  
+**Architect:** RW
+
+### 🚀 Summary
+Extends the platform with a full suite of DJI Cloud API operational scripts,
+mirroring the existing Autel toolset. All scripts are versioned, fully
+commented, and follow the same conventions as their Autel counterparts.
+
+### ✨ New Features
+* **`scripts/dji/` — Complete DJI Script Suite:**
+  * `flight_recorder.py` (v1.0.0) — MQTT → JSONL log recorder for DJI Cloud API
+  * `monitor_mqtt.py` (v1.0.0) — Live packet inspector with colour output
+  * `capture_mqtt_schema.py` (v1.0.0) — Deep-merge schema sniffer, writes `docs/dji_raw_schema.json`
+  * `inspect_telemetry.py` (v1.0.0) — InfluxDB RTK vs barometric altitude auditor
+  * `replay_mission.py` (v1.0.0) — Mission replay for dashboard testing (with bad-packet validation)
+  * `generate_schema_report.py` (v1.0.0) — InfluxDB field-key report generator
+  * `manage_infra.sh` (v1.0.0) — Docker stack manager with MQTT health check
+  * `reset_db.sh` (v1.0.0) — Confirmed-destructive InfluxDB bucket reset
+
+### 🔧 Improvements
+* **`scripts/flight_recorder.py`** (Autel) — bumped to v1.1.0; added full docstring,
+  `on_connect` callback, explicit `MQTTv311` protocol, and `errors='replace'` decode guard.
+* **`scripts/replay_mission.py`** (Autel) — bumped to v1.1.0; added full docstring and
+  environment-variable-driven token support.
+* **README.md** — updated to reflect DJI support, v1.1.0 badge, new repo structure
+  diagram, and an Operational Scripts reference table.
+* **DJI scripts** read the InfluxDB token from the `INFLUX_TOKEN` environment variable
+  instead of hardcoding it, reducing accidental secret exposure.
+
+---
+
 ## v1.0.0 - "The Field Hardened Release" (2025-12-18)
 **Status:** Stable Production Release  
 **Architect:** RW

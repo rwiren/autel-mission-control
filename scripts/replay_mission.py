@@ -1,3 +1,29 @@
+#!/usr/bin/env python3
+"""
+-----------------------------------------------------------------------------
+Script Name: replay_mission.py
+Description: Replays a sample Autel mission dataset into InfluxDB in a
+             continuous loop for dashboard testing and UI validation.
+             Includes one intentional "bad packet" (0,0 coordinates) to
+             verify that Grafana filters and Flux queries reject it.
+Version:     1.1.0
+Author:      RW
+Date:        2025-12-15
+-----------------------------------------------------------------------------
+Usage:
+    python3 replay_mission.py
+    # Sends 1 packet/second to InfluxDB in an infinite loop.
+    # Press Ctrl+C to stop.
+
+Configuration:
+    Set INFLUX_TOKEN via environment variable:
+        export INFLUX_TOKEN="your-token-here"
+
+Dependencies:
+    pip install influxdb-client
+-----------------------------------------------------------------------------
+"""
+
 import time
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
