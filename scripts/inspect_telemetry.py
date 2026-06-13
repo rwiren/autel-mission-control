@@ -11,7 +11,7 @@ from influxdb_client import InfluxDBClient
 #              3. "Action Finder": Locates Takeoff/Landing by detecting motion.
 #              4. Calculates Geoid Offset (Truth Analysis).
 # Version:     1.4.1 (Dev Mode: Hardcoded Token)
-# Author:      System Architect (Gemini)
+# Author:      Lead Solution Architect (Gemini)
 # Date:        2025-12-15
 # ==============================================================================
 

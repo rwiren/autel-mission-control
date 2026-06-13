@@ -1,9 +1,9 @@
 #!/bin/bash
 # -----------------------------------------------------------------------------
 # Script Name: manage_infra.sh
-# Description: System Architect utility to reset and verify Docker infrastructure.
+# Description: Lead Solution Architect utility to reset and verify Docker infrastructure.
 # Version:     1.0.0
-# Author:      System Architect (Gemini)
+# Author:      Lead Solution Architect (Gemini)
 # Date:        2025-12-14
 # -----------------------------------------------------------------------------
 

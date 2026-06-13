@@ -5,7 +5,7 @@ import os
 # Script Name: finalize_dashboard.py
 # Description: Injects the "Green Route + Red Dot" visualization into the dashboard.
 # Version:     1.2.0 (Live View Fix)
-# Author:      System Architect
+# Author:      Lead Solution Architect
 # ==============================================================================
 
 # TARGET FILE: We assume you want to update the engineering dashboard.

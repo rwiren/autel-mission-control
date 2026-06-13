@@ -4,7 +4,7 @@
 # Description: Monitors active connections on RTMP (1935) and RTSP (8554).
 #              Use this to confirm the drone has successfully connected.
 # Version:     1.2.0
-# Author:      System Architect (Gemini)
+# Author:      Lead Solution Architect (Gemini)
 # Date:        2025-12-14
 # ==============================================================================
 

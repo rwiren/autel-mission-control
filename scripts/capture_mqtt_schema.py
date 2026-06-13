@@ -3,7 +3,7 @@
 -----------------------------------------------------------------------------
 Script: capture_mqtt_schema.py
 Version: v1.0.0 (The Wire Sniffer)
-Author: System Architect (Gemini)
+Author: Lead Solution Architect (Gemini)
 Date: 2025-12-14
 Description: 
     Connects to the MQTT Broker and captures the RAW JSON stream.

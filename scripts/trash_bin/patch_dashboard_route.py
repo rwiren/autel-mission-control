@@ -8,7 +8,7 @@ import os
 #              - Switches visualization to 'Route' (Path Line).
 #              - Adds 'Drone Position' marker.
 # Version:     1.1.0 (Recursive Fix)
-# Author:      System Architect (Gemini)
+# Author:      Lead Solution Architect (Gemini)
 # Date:        2025-12-15
 # ==============================================================================
 

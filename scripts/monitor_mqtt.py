@@ -4,7 +4,7 @@ Script Name: monitor_mqtt.py
 Description: Real-time MQTT packet inspector. Subscribes to all topics (#)
              and pretty-prints incoming JSON telemetry for verification.
 Version:     1.0.0
-Author:      System Architect
+Author:      Lead Solution Architect
 Date:        2025-12-14
 -----------------------------------------------------------------------------
 """

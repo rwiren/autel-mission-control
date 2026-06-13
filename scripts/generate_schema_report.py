@@ -7,7 +7,7 @@ from influxdb_client import InfluxDBClient
 # Description: Connects to InfluxDB, infers the schema of existing measurements,
 #              and generates a JSON report for Grafana dashboard building.
 # Version:     1.1.1 (Token Fix & Performance Tuning)
-# Author:      System Architect (Gemini)
+# Author:      Lead Solution Architect (Gemini)
 # Date:        2025-12-15
 # ==============================================================================
 

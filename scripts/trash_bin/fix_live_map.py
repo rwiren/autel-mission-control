@@ -8,7 +8,7 @@ import os
 #              2. Adds a 'Drone Marker' (Red Dot) for the current position.
 #              3. EXPLICITLY maps 'lat' and 'lon' fields to fix "Unable to find location".
 # Version:     1.2.1 (Fixes Nested Panels & Field Mapping)
-# Author:      System Architect
+# Author:      Lead Solution Architect
 # ==============================================================================
 
 # TARGET FILE: 

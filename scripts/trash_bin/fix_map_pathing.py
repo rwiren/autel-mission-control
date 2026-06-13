@@ -8,7 +8,7 @@ import re
 #              1. Updates the Flux query to GROUP and SORT data (Critical for lines).
 #              2. Configures the Geomap panel to explicitly use 'lat'/'lon'.
 # Version:     1.3.0 (Flux Sorting & Grouping Fix)
-# Author:      System Architect
+# Author:      Lead Solution Architect
 # ==============================================================================
 
 DASHBOARD_PATH = "src/dashboards/autel_engineering_v2.json"
