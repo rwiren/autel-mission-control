@@ -249,9 +249,9 @@ While running these onboard systems simultaneously places high thermal and proce
 
 ---
 
-## **Appendix: Field Validation Results (Ericsson Jorvas, 2026-06-12)**
+## **Appendix: Field Validation Results (Kirkkonummi, 2026-06-12)**
 
-*Author: Richard Wirén, Lead Solution Architect — Ericsson*
+*Author: Richard Wirén, Independent Researcher*
 
 The following findings were obtained during a controlled test flight at the Ericsson campus in Jorvas, Finland (60.13°N, 24.52°E) using firmware v1.9.1.219. These results validate the platform's AI capabilities and document calibration parameters for integrating the MQTT detection stream with post-flight image analysis.
 
@@ -340,7 +340,7 @@ The flight served as a validation of patent WO2025034145A1 ("Calculating Lateral
 
 ### **Parking Occupancy Monitoring**
 
-At 134 m nadir (GSD ~3.4 cm/px), the system detected **104 vehicles** across the Ericsson Jorvas parking lot — approximately 59% occupancy. Post-processing with aspect ratio filtering (`width/height > 1.4 = non-vehicle`) eliminated false positives from dumpsters, skylights, and HVAC equipment visible on rooftops.
+At 134 m nadir (GSD ~3.4 cm/px), the system detected **104 vehicles** across the Kirkkonummi parking lot — approximately 59% occupancy. Post-processing with aspect ratio filtering (`width/height > 1.4 = non-vehicle`) eliminated false positives from dumpsters, skylights, and HVAC equipment visible on rooftops.
 
 ### **Model Comparison**
 
