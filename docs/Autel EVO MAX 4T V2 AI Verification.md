@@ -253,7 +253,7 @@ While running these onboard systems simultaneously places high thermal and proce
 
 *Author: Richard Wirén, Independent Researcher*
 
-The following findings were obtained during a controlled test flight at the Ericsson campus in Jorvas, Finland (60.13°N, 24.52°E) using firmware v1.9.1.219. These results validate the platform's AI capabilities and document calibration parameters for integrating the MQTT detection stream with post-flight image analysis.
+The following findings were obtained during a controlled test flight at the test site in Kirkkonummi, Finland (60.13°N, 24.52°E) using firmware v1.9.1.219. These results validate the platform's AI capabilities and document calibration parameters for integrating the MQTT detection stream with post-flight image analysis.
 
 ### **Test Configuration**
 
@@ -363,7 +363,7 @@ Three detection approaches were evaluated on the same imagery:
 
 ### **References**
 
-- Patent: [WO2025034145A1](https://patents.google.com/patent/WO2025034145A1/en) — "Calculating Lateral Distance from Uncrewed Autonomous Vehicle to Object" (Wirén, Grancharov — Ericsson, 2025)
+- Patent: [WO2025034145A1](https://patents.google.com/patent/WO2025034145A1/en) — "Calculating Lateral Distance from Uncrewed Autonomous Vehicle to Object" (Wirén, Grancharov, 2025)
 - Companion repository: [autel-mission-control](https://github.com/rwiren/autel-mission-control) — MQTT bridge, DVR, telemetry dashboards
-- Detection pipeline: `lmfwire/detection-with-drone` (Ericsson internal GitLab)
+- Detection pipeline: `rwiren/drone-cv-detection` (GitHub)
 - EU Regulation: [Commission Implementing Regulation (EU) 2019/947](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32019R0947)
