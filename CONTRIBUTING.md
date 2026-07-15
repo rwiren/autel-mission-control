@@ -2,12 +2,17 @@
 
 Thank you for your interest in contributing!
 
+## Branching Model
+
+- **`main`** — stable releases only
+- **`develop`** — active development (submit PRs here)
+
 ## How to Contribute
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Commit your changes using [Conventional Commits](https://www.conventionalcommits.org/)
-4. Push to your fork and open a Pull Request
+2. Create a feature branch from `develop` (`git checkout -b feature/your-feature develop`)
+3. Commit using [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`)
+4. Push to your fork and open a Pull Request targeting `develop`
 
 ## Development Setup
 
